@@ -1,2 +1,2 @@
 include ':app'
-rootProject.name='Moodle ToDo'
+rootProject.name='Moodle Events'
