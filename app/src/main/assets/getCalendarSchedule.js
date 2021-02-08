@@ -12,7 +12,7 @@ async function a() {
             ajaxData.push({
                 index: 0,
                 methodname: "core_calendar_get_calendar_monthly_view",
-                args: { "year": nowYear, "month": nowMonth, "courseid": 1, "categoryid": 0, "includenavigation": false, "mini": true }
+                args: { "year": nowYear, "month": nowMonth, "courseid": 1, "categoryid": 0, "includenavigation": false, "mini": false }
             });
             ajaxData = JSON.stringify(ajaxData);
             var order = {
@@ -36,6 +36,8 @@ async function a() {
         return;
     }
     catch (error) {
+        console.log(error);
+        console.log("errorrrrrrrrrrrrrrrrrrrrrrrrrr");
         Android.error(error);
     }
 }

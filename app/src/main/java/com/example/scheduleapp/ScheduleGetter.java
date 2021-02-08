@@ -34,7 +34,11 @@ public class ScheduleGetter extends Object{
             int len = url.length(); //urlの長さ
             char end = url.charAt(len - 1);
             System.out.println(url);
-            if (end == '1') {
+            if(url.matches("https://cclms.kyoto-su.ac.jp/calendar/view.php.view=month.*?")){
+                //getActionCalendarEvents();
+                getCalendarEvents();
+            }
+            else if (end == '1') {
                 view.evaluateJavascript("document.getElementById('username').value='"+user.getUserId()+"'", null);
                 view.evaluateJavascript("document.getElementById('password').value='"+user.getPassword()+"'", null);
                 view.evaluateJavascript("var elements=document.getElementsByClassName('form-element form-button')\nelements[0].click()", null);
@@ -49,10 +53,6 @@ public class ScheduleGetter extends Object{
                 }
             }else if(url.matches("https://cclms.kyoto-su.ac.jp/login/index.php?")){
                 view.evaluateJavascript("document.getElementById('gakuninloginbtn').click()", null);
-            }
-            else if(url.matches("https://cclms.kyoto-su.ac.jp/calendar/view.php.view=month.*?")){
-                //getActionCalendarEvents();
-                getCalendarEvents();
             }
 
         }});

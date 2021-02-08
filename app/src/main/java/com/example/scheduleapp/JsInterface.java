@@ -28,6 +28,7 @@ public class JsInterface extends Object{
      */
     @JavascriptInterface
     public void add(String aString){
+        System.out.println("JS追加処理");
         this.model.addCalendarSchedules(aString);
 
     }
