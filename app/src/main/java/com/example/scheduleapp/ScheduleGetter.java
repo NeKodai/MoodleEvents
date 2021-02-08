@@ -12,13 +12,11 @@ import java.io.IOException;
 public class ScheduleGetter extends Object{
     private  WebView hiddenView;
     private AuthPassWord anAuthPassWord;
-    private Model model;
 
     public ScheduleGetter(Model model,WebView aView){
         hiddenView = aView;
         hiddenView.getSettings().setJavaScriptEnabled(true);//javascriptオン
         hiddenView.getSettings().setDomStorageEnabled(true); // WebStorageをオン
-        this.model = model;
         anAuthPassWord = new AuthPassWord();
     }
 
@@ -31,6 +29,7 @@ public class ScheduleGetter extends Object{
         this.hiddenView.setWebViewClient(new WebViewClient() {
         @Override
         public void onPageFinished(WebView view, String url) {
+            super.onPageFinished(view,url);
             int len = url.length(); //urlの長さ
             char end = url.charAt(len - 1);
             System.out.println(url);
@@ -45,7 +44,6 @@ public class ScheduleGetter extends Object{
             } else if (end == '2') {
                 try {
                     String script = String.format("document.getElementById('token').value='%s'", anAuthPassWord.getAuthPass(user.getAuthKey()));
-
                     view.evaluateJavascript(script, null);
                     view.evaluateJavascript("var elements=document.getElementsByClassName('form-element form-button')\nelements[0].click()", null);
                 } catch (Exception anException) {
