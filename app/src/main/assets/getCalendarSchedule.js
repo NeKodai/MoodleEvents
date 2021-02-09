@@ -1,5 +1,4 @@
-async function a() {
-
+async function get() {
     try {
         var sess = YUI.config["global"]["M"]["cfg"]["sesskey"];
         var url = "https://cclms.kyoto-su.ac.jp/lib/ajax/service.php?sesskey=" + sess + "&info=core_calendar_get_calendar_monthly_view";
@@ -9,7 +8,7 @@ async function a() {
         var ajaxList = [];
         var results = [];
         console.log($);
-        for (let i = 0; i < 12; i++) {
+        for (let i = 0; i < 10; i++) {
             ajaxData = [];
             ajaxData.push({
                 index: 0,
@@ -22,7 +21,7 @@ async function a() {
                 data: ajaxData,
                 context: "hoge",
                 dataType: "json",
-                processData: false,
+                processData: true,
                 async: true,
                 contentType: "application/json",
                 timeout: 100000
@@ -47,4 +46,14 @@ async function a() {
     }
     return;
 }
-(function () { a(); })();
+function wait (){
+    setTimeout(function(){
+        console.log("iiiiiiiiii");
+        if(jQuery){
+            clearInterval();
+            get();
+        }
+    },5000);
+}(function () { wait(); })();
+
+

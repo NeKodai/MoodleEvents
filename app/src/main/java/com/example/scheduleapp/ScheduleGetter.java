@@ -1,6 +1,7 @@
 package com.example.scheduleapp;
 
 
+import android.webkit.CookieManager;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -14,9 +15,11 @@ public class ScheduleGetter extends Object{
     private AuthPassWord anAuthPassWord;
 
     public ScheduleGetter(Model model,WebView aView){
-        hiddenView = aView;
-        hiddenView.getSettings().setJavaScriptEnabled(true);//javascriptオン
-        hiddenView.getSettings().setDomStorageEnabled(true); // WebStorageをオン
+        this.hiddenView = aView;
+        this.hiddenView.getSettings().setJavaScriptEnabled(true);//javascriptオン
+        this.hiddenView.getSettings().setDomStorageEnabled(true); // WebStorageをオン
+        this.hiddenView.getSettings().setAllowUniversalAccessFromFileURLs(true);
+        this.hiddenView.clearCache(true);
         anAuthPassWord = new AuthPassWord();
     }
 
@@ -26,6 +29,12 @@ public class ScheduleGetter extends Object{
     public void loadMoodle(){
         UserStatus user = new UserStatus();
         user.readUserStatus();
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.setAcceptCookie(true);
+        cookieManager.removeAllCookie();
+        cookieManager.setAcceptThirdPartyCookies(this.hiddenView, true);
+        this.hiddenView.loadUrl("https://cclms.kyoto-su.ac.jp/auth/shibboleth/");
+
         this.hiddenView.setWebViewClient(new WebViewClient() {
         @Override
         public void onPageFinished(WebView view, String url) {
@@ -33,8 +42,8 @@ public class ScheduleGetter extends Object{
             int len = url.length(); //urlの長さ
             char end = url.charAt(len - 1);
             System.out.println(url);
-            if(url.matches("https://cclms.kyoto-su.ac.jp/calendar/view.php.view=month.*?")){
-                //getActionCalendarEvents();
+            if(url.matches("https://cclms.kyoto-su.ac.jp/")){
+                System.out.println("get schedule");
                 getCalendarEvents();
             }
             else if (end == '1') {
@@ -50,11 +59,11 @@ public class ScheduleGetter extends Object{
                     anException.printStackTrace();
                 }
             }else if(url.matches("https://cclms.kyoto-su.ac.jp/login/index.php?")){
-                view.evaluateJavascript("document.getElementById('gakuninloginbtn').click()", null);
+                gakuninButtonClick();
             }
 
         }});
-        this.hiddenView.loadUrl("https://cclms.kyoto-su.ac.jp/calendar/view.php?view=month");
+
     }
 
     /**
@@ -72,14 +81,18 @@ public class ScheduleGetter extends Object{
         return;
     }
 
-    private void getActionCalendarEvents(){
+    /**
+     * 学認からログインのボタンをクリックする
+     */
+    private void gakuninButtonClick(){
         try {
-            String script = FileUtility.readAssets("getActionEvent.js");
+            String script = FileUtility.readAssets("gakuninButtonClick.js");
             this.hiddenView.evaluateJavascript(script, null);
         }catch (IOException anException){
             anException.printStackTrace();
             System.out.println("js読み込み失敗");
         }
+        return;
     }
 
 }
