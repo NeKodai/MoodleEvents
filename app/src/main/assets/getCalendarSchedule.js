@@ -8,7 +8,7 @@ async function get() {
         var ajaxList = [];
         var results = [];
         console.log($);
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 2; i++) {
             ajaxData = [];
             ajaxData.push({
                 index: 0,
@@ -22,21 +22,21 @@ async function get() {
                 context: "hoge",
                 dataType: "json",
                 processData: true,
-                async: true,
+                async: false,
                 contentType: "application/json",
                 timeout: 100000
             };
-            ajaxList.push($.ajax(url, order).then((data) => (results.push(data)),
-                                                 (error) => (console.log(JSON.stringify(error))))
-                                                 );
+            await $.ajax(url, order).then((data) => (results.push(data)),
+                                                 (error) => (console.log(JSON.stringify(error))));
             nowMonth += 1;
             if (nowMonth > 12) {
                 nowMonth = 1;
                 nowYear += 1;
             }
         }
-        await Promise.all(ajaxList).then(() => { console.log("promise success")});
-        Android.add(JSON.stringify(results));
+        //Android.add(JSON.stringify(results));
+        //await Promise.all(ajaxList).then(() => { console.log("promise success")});
+
     }
     catch (error) {
         console.log(error);

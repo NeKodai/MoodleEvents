@@ -87,6 +87,7 @@ public class ScheduleGetter extends Object{
     private void gakuninButtonClick(){
         try {
             String script = FileUtility.readAssets("gakuninButtonClick.js");
+            script = script.replaceAll(" \t","");
             this.hiddenView.evaluateJavascript(script, null);
         }catch (IOException anException){
             anException.printStackTrace();

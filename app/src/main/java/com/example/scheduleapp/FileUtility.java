@@ -91,6 +91,7 @@ public class FileUtility{
         String line;
         while ((line = bufferedReader.readLine()) != null) {
             aBuilder.append(line);
+            aBuilder.append(System.getProperty("line.separator"));
         }
         bufferedReader.close();
         return new String(aBuilder);
