@@ -1,10 +1,6 @@
-async function getProcess(ajaxData,url,results,i){
+async function getProcess(ajaxData,url,results,errorIndex,i){
     console.log(i);
     console.log(ajaxData);
-    if(i>5){
-        console.log("limit exceeded");
-        return false;
-    }
     var order = {
         type: "POST",
         data: ajaxData,
@@ -15,9 +11,17 @@ async function getProcess(ajaxData,url,results,i){
         contentType: "application/json",
         timeout: 100000
     };
-    var process = $.ajax(url, order).then((data) => (results.push(data)),
-                                         (error) => (getProcess(ajaxData,url,results,i+1)));
-    return await process;
+    const process = new Promise((resolve,reject) => {
+                            $.ajax(url, order).then(function(data){
+                                results.push(data);
+                                resolve();
+                             },
+                             function(error){
+                                 console.log("e"+i);
+                                 errorIndex.push(i);
+                                 resolve(new Error());
+                             });});
+    return process;
 }
 
 async function get() {
@@ -30,6 +34,7 @@ async function get() {
         var ajaxList = [];
         var ajaxDataList = [];
         var results = [];
+        var errorIndex = [];
         for (let i = 0; i < 12; i++) {
             console.log(i);
             var ajaxData = [];
@@ -50,11 +55,16 @@ async function get() {
                 contentType: "application/json",
                 timeout: 100000
             };
-            var process = $.ajax(url, order).then((data) => (results.push(data)),
-                                                 function(error){
-                                                 console.log("e"+i);
-                                                 getProcess(ajaxDataList[i],url,results,0);
-                                                 });
+            const process = new Promise((resolve,reject) => {
+                                    $.ajax(url, order).then(function(data){
+                                        results.push(data);
+                                        resolve(1);
+                                     },
+                                     function(error){
+                                         console.log("e"+i);
+                                         errorIndex.push(i);
+                                         resolve(new Error());
+                                     });});
             ajaxList.push(process);
             nowMonth += 1;
             if (nowMonth > 12) {
@@ -62,9 +72,23 @@ async function get() {
                 nowYear += 1;
             }
         }
-        await Promise.all(ajaxList).then(() => { console.log("promise success")});
+        for(let i =0;i<5;i++){
+            await Promise.all(ajaxList).then(function(error){
+                console.log("promise done");
+                ajaxList.splice(0);
+                console.log(error);
+                if(error){
+                    console.log(errorIndex);
+                    errorIndex.forEach(index => {ajaxList.push(getProcess(ajaxDataList[index],url,results,errorIndex,index));});
+                    console.log(ajaxList);
+                    errorIndex.splice(0);
+                }
+            });
+            if(!ajaxList.length){
+                break;
+            }
+        }
         Android.add(JSON.stringify(results));
-
     }
     catch (error) {
         console.log(JSON.stringify(error));
@@ -77,7 +101,7 @@ async function wait (){
     console.log("script executed");
     let flag = true;
     for(let i =0; i<5;i++){
-        await new Promise(resolve => setTimeout(resolve,1000));
+        await new Promise(resolve => setTimeout(resolve,500));
         if(typeof jQuery !== 'undefined' && typeof YUI !=='undefined'){
              get();
              flag = false;
