@@ -14,7 +14,7 @@ async function getProcess(ajaxData,url,results,errorIndex,i){
     const process = new Promise((resolve,reject) => {
                             $.ajax(url, order).then(function(data){
                                 results.push(data);
-                                resolve();
+                                resolve(1);
                              },
                              function(error){
                                  console.log("e"+i);
@@ -36,7 +36,6 @@ async function get() {
         var results = [];
         var errorIndex = [];
         for (let i = 0; i < 12; i++) {
-            console.log(i);
             var ajaxData = [];
             ajaxData.push({
                 index: 0,
@@ -100,16 +99,11 @@ async function get() {
 async function wait (){
     console.log("script executed");
     let flag = true;
-    for(let i =0; i<5;i++){
-        await new Promise(resolve => setTimeout(resolve,500));
-        if(typeof jQuery !== 'undefined' && typeof YUI !=='undefined'){
-             get();
-             flag = false;
-             break;
-         }
-         console.log("error load "+i);
+    await new Promise(resolve => setTimeout(resolve,500));
+    if(typeof jQuery !== 'undefined' && typeof YUI !=='undefined'){
+         get();
      }
-    if(flag){
+    else{
         Android.error("アクセス不能");
      }
 }(function () { wait(); })();
