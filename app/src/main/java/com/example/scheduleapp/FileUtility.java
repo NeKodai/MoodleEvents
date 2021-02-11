@@ -116,7 +116,6 @@ public class FileUtility{
         return decodedString;
     }
 
-
     /**
      * AES暗号化方式で書き込む
      * @param fileName ファイル名

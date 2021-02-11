@@ -15,6 +15,7 @@ import java.io.IOException;
 public class ScheduleGetter extends Object{
     private  WebView hiddenView;
     private AuthPassWord anAuthPassWord;
+    private UserStatus user;
     private CookieManager cookieManager;
 
     public ScheduleGetter(Model model,WebView aView){
@@ -29,60 +30,66 @@ public class ScheduleGetter extends Object{
         this.cookieManager.removeAllCookies(null);
         this.cookieManager.setAcceptThirdPartyCookies(this.hiddenView, true);
         this.cookieManager.flush();
-        anAuthPassWord = new AuthPassWord();
+        this.anAuthPassWord = new AuthPassWord();
+        this.user = new UserStatus();
+        this.user.readUserStatus();
+        this.hiddenView.setWebViewClient(new moodleWebViewClinet());
+    }
+
+
+    /**
+     * moodleログインのためのWebViewClient
+     */
+    private class moodleWebViewClinet extends WebViewClient{
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            super.onPageFinished(view,url);
+            int len = url.length(); //urlの長さ
+            char end = url.charAt(len - 1);
+            System.out.println(url);
+            if(url.matches("https://cclms.kyoto-su.ac.jp/")){
+                System.out.println("get schedule");
+                getCalendarEvents();
+            }
+            else if (url.matches("https://gakunin.kyoto-su.ac.jp/idp/profile/SAML2/Redirect/SSO.execution=.*")) {
+                view.evaluateJavascript("document.getElementById('username')", new ValueCallback<String>() {
+                    @Override
+                    public void onReceiveValue(String value) {
+                        if(!value.equals("null")){ //1段階目の認証
+                            System.out.println("first");
+                            view.evaluateJavascript("document.getElementById('username').value='"+user.getUserId()+"'", null);
+                            view.evaluateJavascript("document.getElementById('password').value='"+user.getPassword()+"'", null);
+                            view.evaluateJavascript("var elements=document.getElementsByClassName('form-element form-button')\nelements[0].click()", null);
+                        }else { //2段階目の認証
+                            System.out.println("second");
+                            try {
+                                String script = String.format("document.getElementById('token').value='%s'", anAuthPassWord.getAuthPass(user.getAuthKey()));
+                                view.evaluateJavascript(script, null);
+                                view.evaluateJavascript("var elements=document.getElementsByClassName('form-element form-button')\nelements[0].click()", null);
+                            } catch (Exception anException) {
+                                anException.printStackTrace();
+                            }
+                        }
+                    }
+                });
+            }else if(url.matches("https://cclms.kyoto-su.ac.jp/login/index.php?")){
+                gakuninButtonClick();
+            }
+        }
+        @Override
+        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+            System.out.println(errorCode);
+            if(errorCode < 0){
+                view.loadUrl("https://cclms.kyoto-su.ac.jp/auth/shibboleth/");
+            }
+        }
     }
 
     /**
      * Moodleにログインする
      */
     public void loadMoodle(){
-        UserStatus user = new UserStatus();
-        user.readUserStatus();
-        this.hiddenView.loadUrl("https://cclms.kyoto-su.ac.jp/auth/shibboleth/");
-        this.hiddenView.setWebViewClient(new WebViewClient() {
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                super.onPageFinished(view,url);
-                int len = url.length(); //urlの長さ
-                char end = url.charAt(len - 1);
-                System.out.println(url);
-                if(url.matches("https://cclms.kyoto-su.ac.jp/")){
-                    System.out.println("get schedule");
-                    getCalendarEvents();
-                }
-                else if (url.matches("https://gakunin.kyoto-su.ac.jp/idp/profile/SAML2/Redirect/SSO.execution=.*")) {
-                    view.evaluateJavascript("document.getElementById('username')", new ValueCallback<String>() {
-                        @Override
-                        public void onReceiveValue(String value) {
-                            if(!value.equals("null")){ //1段階目の認証
-                                System.out.println("first");
-                                view.evaluateJavascript("document.getElementById('username').value='"+user.getUserId()+"'", null);
-                                view.evaluateJavascript("document.getElementById('password').value='"+user.getPassword()+"'", null);
-                                view.evaluateJavascript("var elements=document.getElementsByClassName('form-element form-button')\nelements[0].click()", null);
-                            }else { //2段階目の認証
-                                System.out.println("second");
-                                try {
-                                    String script = String.format("document.getElementById('token').value='%s'", anAuthPassWord.getAuthPass(user.getAuthKey()));
-                                    view.evaluateJavascript(script, null);
-                                    view.evaluateJavascript("var elements=document.getElementsByClassName('form-element form-button')\nelements[0].click()", null);
-                                } catch (Exception anException) {
-                                    anException.printStackTrace();
-                                }
-                            }
-                        }
-                    });
-                }else if(url.matches("https://cclms.kyoto-su.ac.jp/login/index.php?")){
-                    gakuninButtonClick();
-                }
-             }
-            @Override
-            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                System.out.println(errorCode);
-                if(errorCode < 0){
-                    view.loadUrl("https://cclms.kyoto-su.ac.jp/auth/shibboleth/");
-                }
-            }
-        });
+        this.loadURL("https://cclms.kyoto-su.ac.jp/auth/shibboleth/");
     }
 
     /**

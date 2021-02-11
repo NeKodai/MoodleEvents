@@ -11,6 +11,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Calendar;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import android.os.Handler;
 
 /**
@@ -94,6 +97,13 @@ public class Model extends Object{
                         //時刻を取得
                         String timeString = HtmlCompat.fromHtml(formattedTime,HtmlCompat.FROM_HTML_MODE_COMPACT).toString();
                         //ユーザイベント対策　最初の時間しか採用されない不具合あり
+                        Pattern aPattern = Pattern.compile("[0-9][0-9]:[0-9][0-9]");
+                        Matcher aMacher = aPattern.matcher(timeString);
+                        while(aMacher.find()){
+                            System.out.println(aMacher.group());
+                        }
+                        System.out.println("-------------------------");
+
                         timeString = timeString.replaceAll(".*(年|月|日|, )","");
                         String[] timeStringArray = timeString.split("(:| » )");
                         //時間の文字列を整数に変換
