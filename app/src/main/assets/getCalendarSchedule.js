@@ -23,7 +23,6 @@ async function getProcess(ajaxData,url,results,errorIndex,i){
                              });});
     return process;
 }
-
 async function get() {
     try {
         var sess = YUI.config["global"]["M"]["cfg"]["sesskey"];
@@ -71,7 +70,7 @@ async function get() {
                 nowYear += 1;
             }
         }
-        for(let i =0;i<5;i++){
+        for(let i =0;i<10;i++){
             await Promise.all(ajaxList).then(function(error){
                 console.log("promise done");
                 ajaxList.splice(0);
@@ -99,11 +98,11 @@ async function get() {
 async function wait (){
     console.log("script executed");
     let flag = true;
-    await new Promise(resolve => setTimeout(resolve,1000));
     if(typeof jQuery !== 'undefined' && typeof YUI !=='undefined'){
          get();
      }
     else{
+        await new Promise(resolve => setTimeout(resolve,1000));
         Android.error("アクセス不能");
      }
 }(function () { wait(); })();

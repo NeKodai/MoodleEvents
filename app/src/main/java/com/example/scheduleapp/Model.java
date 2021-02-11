@@ -211,6 +211,14 @@ public class Model extends Object{
     }
 
     /**
+     * UIのハンドラを返す
+     * @return UIのハンドラ
+     */
+    public Handler getHandler(){
+        return this.handler;
+    }
+
+    /**
      * 課題が現在よりも過去のものなら削除し、更新通知をする
      */
     public void scheduleUpdate(){

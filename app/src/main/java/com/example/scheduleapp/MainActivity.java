@@ -50,8 +50,8 @@ public class MainActivity extends AppCompatActivity {
         //ファイルユーティリティ初期化
         FileUtility.initialize(getApplicationContext());
         this.model = new Model(this,new Handler());
-        aWebView.addJavascriptInterface(new JsInterface(this,this.model),"Android");
         this.aScheduleGetter = new ScheduleGetter(this.model,aWebView);
+        aWebView.addJavascriptInterface(new JsInterface(this,this.model,this.aScheduleGetter),"Android");
         this.controller = new Controller();
         this.controller.initialize(this,aScheduleGetter);
 
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
      * ビューの依存物に対して更新通知をする
      */
     public void update(){
-        this.rAdapter.update();
+        this.rAdapter.notifyDataSetChanged();
         if(this.model.getScheduleList().isEmpty()){
             this.noScheduleText.setText("課題がありません。\n下にスワイプして更新してください。");
         }

@@ -24,12 +24,11 @@ public class ScheduleGetter extends Object{
         this.hiddenView.getSettings().setAllowUniversalAccessFromFileURLs(true);
         this.hiddenView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
         this.hiddenView.clearCache(true);
-
         this.cookieManager= CookieManager.getInstance();
         this.cookieManager.setAcceptCookie(true);
         this.cookieManager.removeAllCookies(null);
-        this.cookieManager.flush();
         this.cookieManager.setAcceptThirdPartyCookies(this.hiddenView, true);
+        this.cookieManager.flush();
         anAuthPassWord = new AuthPassWord();
     }
 
@@ -84,6 +83,14 @@ public class ScheduleGetter extends Object{
                 }
             }
         });
+    }
+
+    /**
+     * 指定されたURLにアクセスする
+     * @param url URL
+     */
+    public void loadURL(String url){
+        this.hiddenView.loadUrl(url);
     }
 
     /**

@@ -39,8 +39,8 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
 
     // Provide a suitable constructor (depends on the kind of subjectList)
     EventListAdapter(Model aModel) {
-        this.eventList = Collections.synchronizedList(new ArrayList<>());
         this.aModel = aModel;
+        this.eventList = aModel.getScheduleList();
     }
 
     // Create new views (invoked by the layout manager)
@@ -131,20 +131,5 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
      */
     protected void onItemClick(View view, Integer position, Subject aSubject){
 
-    }
-
-    /**
-     * イベントリストを更新する。
-     * モデルのデータが更新された場合に呼び出す
-     */
-    public void update(){
-        this.eventList.clear();
-        this.aModel.getScheduleList().forEach((subject -> {
-            System.out.println(subject);
-            System.out.println("------------------------------------------------");
-            this.eventList.add(subject);
-        }));
-        this.notifyDataSetChanged();
-        return;
     }
 }

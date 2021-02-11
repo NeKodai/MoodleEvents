@@ -3,7 +3,6 @@ package com.example.scheduleapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.webkit.JavascriptInterface;
-import android.widget.Toast;
 
 /**
  * Javascriptから呼ぶJavaのメソッドを定義するクラス
@@ -11,15 +10,18 @@ import android.widget.Toast;
 public class JsInterface extends Object{
     protected Model model;
     private AppCompatActivity  activity;
+    private ScheduleGetter scheduleGetter;
+    private volatile Integer errorCount = 0;
 
     /**
      * このクラスのコンストラクタ
       * @param activity
      * @param aModel
      */
-    JsInterface(AppCompatActivity activity,Model aModel){
+    JsInterface(AppCompatActivity activity,Model aModel,ScheduleGetter scheduleGetter){
         this.activity = activity;
         this.model = aModel;
+        this.scheduleGetter = scheduleGetter;
     }
 
     /**
@@ -29,6 +31,7 @@ public class JsInterface extends Object{
     @JavascriptInterface
     public void add(String aString){
         System.out.println("JS追加処理");
+        this.errorCount = 0;
         this.model.addCalendarSchedules(aString);
 
     }
@@ -46,7 +49,23 @@ public class JsInterface extends Object{
     @JavascriptInterface
     public void error(String aString){
         System.out.println(aString);
-        this.model.notifyFailedCalendarUpdate();
+        if(this.errorCount>5){
+            this.model.notifyFailedCalendarUpdate();
+            this.errorCount = 0;
+        }
+        else if(aString.equals("アクセス不能")){
+            System.out.println(this.errorCount);
+            synchronized (this){
+                this.errorCount +=1;
+            }
+            this.model.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    scheduleGetter.loadURL("https://cclms.kyoto-su.ac.jp/auth/shibboleth/");
+                }
+            });
+        }
+
 
     }
 
