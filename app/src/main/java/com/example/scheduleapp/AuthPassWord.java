@@ -3,7 +3,7 @@ package com.example.scheduleapp;
 /**
  * 2段階認証のワンタイムパスワードの計算
  * @author NekoZ
- * @version 1.0.0
+ * @version 1.0.1
  */
 
 import javax.crypto.Mac;
@@ -22,22 +22,16 @@ public class AuthPassWord {
      */
     private String keyTobBinaryString(String aKey) {
 
-        ArrayList<String> bitStringList = new ArrayList<>();
+        StringBuilder builder = new StringBuilder();
         for (Character aCharacter : aKey.toCharArray()) {
             if (aCharacter == '=') {
                 continue;
             }
             Integer modifiedInteger = aCharacter < 65 ? (aCharacter - 50 + 26) : (aCharacter - 65);
-            if (aCharacter < 65) {
-                modifiedInteger = aCharacter - 50 + 26;
-            } else {
-                modifiedInteger = aCharacter - 65;
-            }
-
             String bitString = Integer.toBinaryString(modifiedInteger);
-            bitStringList.add(String.format("%5s", bitString).replace(" ", "0"));
+            builder.append(String.format("%5s", bitString).replace(" ", "0"));
         }
-        return String.join("", bitStringList);
+        return new String(builder);
     }
 
     /**
@@ -128,6 +122,7 @@ public class AuthPassWord {
      * @return ワンタイムパスワードの文字列
      */
     public String getAuthPass(String secretKey) throws NoSuchAlgorithmException, InvalidKeyException {
+        secretKey = secretKey.trim();
         Long TC = System.currentTimeMillis() / 1000L;
         Long timeIndex = ((TC - 0) / 30);
         String binaryString = this.keyTobBinaryString(secretKey);
@@ -136,3 +131,4 @@ public class AuthPassWord {
         return this.hashToAuthPass(hashByteArray);
     }
 }
+

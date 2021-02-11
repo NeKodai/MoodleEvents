@@ -4,12 +4,12 @@
     <item
         android:state_selected="false"
         android:state_pressed="false"
-        android:color="@color/design_default_color_background" />
+        android:drawable="@color/design_default_color_background" />
     <item
         android:state_pressed="true"
-        android:color="@color/colorSelect" />
+        android:drawable="@color/colorSelect" />
     <item
         android:state_selected="true"
         android:state_pressed="false"
-        android:color="@color/colorSelect" />
+        android:drawable="@color/colorSelect" />
 </selector>

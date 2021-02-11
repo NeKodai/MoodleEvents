@@ -84,7 +84,6 @@ public class ScheduleGetter extends Object{
                 }
             }
         });
-
     }
 
     /**

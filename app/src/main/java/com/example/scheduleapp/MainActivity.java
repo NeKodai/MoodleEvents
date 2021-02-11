@@ -27,7 +27,7 @@ import java.util.TimerTask;
  */
 public class MainActivity extends AppCompatActivity {
 
-    private RecyclerView.Adapter rAdapter;
+    private EventListAdapter rAdapter;
     private ScheduleGetter aScheduleGetter;
     private Controller controller;
     private Model model;
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
      * ビューの依存物に対して更新通知をする
      */
     public void update(){
-        this.rAdapter.notifyDataSetChanged();
+        this.rAdapter.update();
         if(this.model.getScheduleList().isEmpty()){
             this.noScheduleText.setText("課題がありません。\n下にスワイプして更新してください。");
         }
@@ -148,7 +148,6 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("中断しました");
         return;
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

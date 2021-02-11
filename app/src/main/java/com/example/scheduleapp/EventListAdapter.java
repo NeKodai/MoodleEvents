@@ -9,11 +9,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 
 public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.ViewHolder> {
 
-    private List<Subject> schedule;
+    private List<Subject> eventList;
+    private Model aModel;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -35,7 +39,8 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
 
     // Provide a suitable constructor (depends on the kind of subjectList)
     EventListAdapter(Model aModel) {
-        this.schedule = aModel.getScheduleList();
+        this.eventList = Collections.synchronizedList(new ArrayList<>());
+        this.aModel = aModel;
     }
 
     // Create new views (invoked by the layout manager)
@@ -53,7 +58,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
             public void onClick(View view) {
                 int position = holder.getAdapterPosition();
                 //処理はonItemClick()に丸投げ
-                onItemClick(view, position, schedule.get(position));
+                onItemClick(view, position, eventList.get(position));
             }
         });
         return holder;
@@ -64,15 +69,15 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         // - get element from your subjectList at this position
         // - replace the contents of the view with that element
-        holder.title.setText(this.schedule.get(position).getTitle());
+        holder.title.setText(this.eventList.get(position).getTitle());
         setDeadLineString(holder.deadLine,position);
-        holder.course.setText(this.schedule.get(position).getCourseName());
+        holder.course.setText(this.eventList.get(position).getCourseName());
     }
 
     // Return the size of your subjectList (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        return this.schedule.size();
+        return this.eventList.size();
     }
 
 
@@ -83,7 +88,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
      */
     private void setDeadLineString(TextView deadLineTextView,Integer position){
         Long currentMillis = System.currentTimeMillis();
-        Long targetMillis = this.schedule.get(position).getCalendar().getTimeInMillis();
+        Long targetMillis = this.eventList.get(position).getCalendar().getTimeInMillis();
         Long diffMillis = targetMillis-currentMillis;
         // ミリ秒から秒へ変換
         Long diffSeconds = diffMillis / 1000;
@@ -118,10 +123,28 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
         return;
     }
 
+    /**
+     * クリックした際の処理。オーバライドして定義
+     * @param view view
+     * @param position 選択したインデックス番号
+     * @param aSubject イベントオブジェクト
+     */
     protected void onItemClick(View view, Integer position, Subject aSubject){
 
     }
 
-
-
+    /**
+     * イベントリストを更新する。
+     * モデルのデータが更新された場合に呼び出す
+     */
+    public void update(){
+        this.eventList.clear();
+        this.aModel.getScheduleList().forEach((subject -> {
+            System.out.println(subject);
+            System.out.println("------------------------------------------------");
+            this.eventList.add(subject);
+        }));
+        this.notifyDataSetChanged();
+        return;
+    }
 }
