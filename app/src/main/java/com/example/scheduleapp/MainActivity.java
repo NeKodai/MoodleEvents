@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         this.recyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager rLayoutManager = new LinearLayoutManager(this);
         this.recyclerView.setLayoutManager(rLayoutManager);
-        this.rAdapter = new EventListAdapter(this.model){
+        this.rAdapter = new EventListAdapter(this.model,this){
             @Override
             protected void onItemClick(View view, Integer position, Subject aSubject){
                 controller.setSubActivity(aSubject);

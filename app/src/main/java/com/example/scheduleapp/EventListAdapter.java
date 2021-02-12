@@ -1,8 +1,10 @@
 package com.example.scheduleapp;
 
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.annotation.NonNull;
 
+import android.app.Activity;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,11 +15,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.ViewHolder> {
 
     private List<Subject> eventList;
     private Model model;
+    private Activity activity;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -38,9 +42,10 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
     }
 
     // Provide a suitable constructor (depends on the kind of subjectList)
-    EventListAdapter(Model model) {
+    EventListAdapter(Model model,Activity activity) {
         this.model = model;
         this.eventList = new ArrayList<Subject>();
+        this.activity = activity;
     }
 
     // Create new views (invoked by the layout manager)
@@ -89,38 +94,64 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
     private void setDeadLineString(TextView deadLineTextView,Integer position){
         Long currentMillis = System.currentTimeMillis();
         Long targetMillis = this.eventList.get(position).getRepresentativeTime();
+        StringBuilder builder = new StringBuilder();
+        boolean isEnded = false;
         Long diffMillis = targetMillis-currentMillis;
+        if(diffMillis<0){
+            isEnded = true;
+            diffMillis*=-1;
+        }
         // ミリ秒から秒へ変換
         Long diffSeconds = diffMillis / 1000;
         //秒から分へ
-        Long diffMinute = diffSeconds / 60;
-        Long diffHour = diffMinute/60;
+        Long diffMinutes = diffSeconds / 60;
+        Long diffHour = diffMinutes/60;
         Long diffDay = diffHour / 24;
-        if (diffMinute==0 && diffHour == 0){
-            deadLineTextView.setText("あと"+diffSeconds+"秒");
-            deadLineTextView.setTextColor(Color.RED);
+
+        if(!isEnded){
+            builder.append("あと");
+            deadLineTextView.setTextColor(this.getDeadLineColor(diffDay));
+        }else{
+            deadLineTextView.setTextColor(ContextCompat.getColor(this.activity,R.color.deadLineEnded));
+        }
+        if (diffMinutes==0 && diffHour == 0){
+            builder.append(diffSeconds);
+            builder.append("秒");
         }
         else if(diffHour==0){
-            deadLineTextView.setText("あと"+diffMinute+"分");
-            deadLineTextView.setTextColor(Color.RED);
+            builder.append(diffMinutes);
+            builder.append("分");
         }
         else if(diffDay==0){
-            deadLineTextView.setText("あと"+diffHour+"時間"+diffMinute%(60*diffHour)+"分");
-            deadLineTextView.setTextColor(Color.RED);
-        }
-        else if(diffDay<=1){
-            deadLineTextView.setText("あと" + diffDay + "日");
-            deadLineTextView.setTextColor(Color.RED);
-        }
-        else if(diffDay<=3){
-            deadLineTextView.setText("あと" + diffDay + "日");
-            deadLineTextView.setTextColor(Color.parseColor("#FF9900"));
+            builder.append(diffHour);
+            builder.append("時間");
+            builder.append(diffMinutes%(60*diffHour));
+            builder.append("分");
         }
         else {
-            deadLineTextView.setText("あと" + diffDay + "日");
-            deadLineTextView.setTextColor(Color.parseColor("#008D56"));
+            builder.append(diffDay);
+            builder.append("日");
         }
+
+        if(isEnded)builder.append("前");
+
+        deadLineTextView.setText(new String(builder));
         return;
+    }
+
+    /**
+     * 締め切りまでの時間の文字の色を返す
+     * @param diffDay 今の時間と締め切りまでの差（日）
+     * @return 色を表す整数
+     */
+    private int getDeadLineColor(Long diffDay){
+        if(diffDay>3){
+            return ContextCompat.getColor(this.activity,R.color.deadLineSafe);
+        }
+        else if(diffDay>1){
+            return ContextCompat.getColor(this.activity,R.color.deadLineWarning);
+        }
+        return ContextCompat.getColor(this.activity, R.color.deadLineDanger);
     }
 
     /**
