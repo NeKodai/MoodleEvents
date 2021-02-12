@@ -7,5 +7,9 @@
     <color name="colorWhite">#FFFFFFFF</color>
     <color name="saveButton">#FF357B</color>
     <color name="saveButtonPushed">#AF315D</color>
+    <color name="deadLineEnded">#535353</color>
+    <color name="deadLineDanger">#EA0000</color>
+    <color name="deadLineWarning">#FF9900</color>
+    <color name="deadLineSafe">#008D56</color>
 
 </resources>

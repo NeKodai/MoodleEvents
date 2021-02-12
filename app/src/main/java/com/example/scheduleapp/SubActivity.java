@@ -6,6 +6,7 @@ import androidx.core.text.HtmlCompat;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
 import android.widget.TextView;
 import android.text.Spanned;
 
@@ -19,9 +20,10 @@ import java.util.TimerTask;
  */
 public class SubActivity extends AppCompatActivity {
 
-    private Calendar aCalendar;
     private TextView untilDeadLineText;
     private Handler handler;
+    private Subject aSubject;
+    private Timer timer;
 
     /**
      * ビューの初期設定
@@ -31,12 +33,14 @@ public class SubActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         this.handler = new Handler();
-        Subject aSubject = (Subject)getIntent().getSerializableExtra("subject");
+        this.aSubject = (Subject)getIntent().getSerializableExtra("subject");
         setContentView(R.layout.subject_view);
         TextView title = findViewById(R.id.subject_title);
         TextView course = findViewById(R.id.subject_course);
-        TextView deadLine = findViewById(R.id.subject_deadline);
+        TextView startTime = findViewById(R.id.subject_start_time);
+        TextView endTime = findViewById(R.id.subject_end_time);
         TextView description = findViewById(R.id.subject_description);
+        TextView startOrEnd = findViewById(R.id.start_or_end);
         this.untilDeadLineText = findViewById(R.id.subject_until_deadline);
 
         title.setText(aSubject.getTitle());
@@ -44,36 +48,30 @@ public class SubActivity extends AppCompatActivity {
         String descriptionString = aSubject.getDescription();
         Spanned spannedDescription = HtmlCompat.fromHtml(descriptionString, HtmlCompat.FROM_HTML_MODE_COMPACT);
 
+        //説明のテキストを設定
         if(spannedDescription.toString().equals("")) {
             description.setText("なし");
         }
         else {
             description.setText(spannedDescription);
         }
-        this.aCalendar = aSubject.getCalendar();
-        String deadLineText = String.format(Locale.US,"提出期限 %d年%d月%d日 %d時%d分",
-                this.aCalendar.get(Calendar.YEAR),this.aCalendar.get(Calendar.MONTH)+1,this.aCalendar.get(Calendar.DATE),
-                this.aCalendar.get(Calendar.HOUR_OF_DAY),this.aCalendar.get(Calendar.MINUTE));
-        deadLine.setText(deadLineText);
-        setUntilDeadLineText();
-    }
 
-    @Override
-    protected void onStart(){
-        super.onStart();
-        //1秒毎にデータを更新
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        setUntilDeadLineText();
-                    }
-                });
-            }
-        },0,1000);
+        //開始時刻と終了時刻のテキストを設定
+        if(aSubject.getStartTime()!=null){
+            String startTimeText = "開始時刻　" + DayUtility.createDateString(aSubject.getStartTime());
+            startTime.setText(startTimeText);
+            String endTimeText = "終了時刻　" + DayUtility.createDateString(aSubject.getEndTime());
+            endTime.setText(endTimeText);
+        }else{
+            //開始時刻が定義されていないのでTextViewを消す
+            startTime.setVisibility(View.GONE);
+            //userイベントなら開始時刻、その他なら提出期限とする
+            String aString = (aSubject.getCourseName().equals("userイベント")) ? "開始時刻　" :"提出期限　";
+            String endTimeText = aString + DayUtility.createDateString(aSubject.getEndTime());
+            endTime.setText(endTimeText);
+        }
+        startOrEnd.setText((this.aSubject.isAlreadyStarted()) ? "終了まで　" : "開始まで　");
+        setUntilDeadLineText();
     }
 
     /**
@@ -81,7 +79,7 @@ public class SubActivity extends AppCompatActivity {
      */
     private void setUntilDeadLineText(){
         Long currentMillis = System.currentTimeMillis();
-        Long targetMillis = this.aCalendar.getTimeInMillis();
+        Long targetMillis = this.aSubject.getRepresentativeTime();
         Long diffMillis = targetMillis-currentMillis;
         // ミリ秒から秒へ変換
         Long diffSeconds = diffMillis / 1000;
@@ -135,6 +133,38 @@ public class SubActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         finish();
         return super.onSupportNavigateUp();
+    }
+
+    /**
+     * このアクティビティの読み込みが完了したときの処理
+     */
+    @Override
+    protected void onStart(){
+        super.onStart();
+        //1秒毎にデータを更新
+        this.timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        setUntilDeadLineText();
+                    }
+                });
+            }
+        },0,1000);
+    }
+
+    /**
+     * このアクティビティから画面が離れた時の処理
+     */
+    @Override
+    protected void onPause(){
+        this.timer.cancel();
+        super.onPause();
+        System.out.println("中断しました");
+        return;
     }
 
 }

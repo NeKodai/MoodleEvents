@@ -13,7 +13,6 @@ import com.google.android.material.textfield.TextInputEditText;
 
 public class SettingActivity extends AppCompatActivity {
 
-
     private UserStatus user; //ユーザ
     private TextInputEditText user_id_text;
     private TextInputEditText password_text;
