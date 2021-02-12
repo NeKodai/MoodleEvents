@@ -14,7 +14,8 @@ public class Subject extends Object implements Comparable<Subject>, Serializable
     private String subjectTitle; //課題のタイトル
     private String description; //課題の内容
     private String courseName; //コースの名前
-    private Calendar calendar; //課題の時間を持つカレンダー
+    private Calendar startTime; //課題の開始時間を持つカレンダー
+    private Calendar endTime; //課題終了時間を持つカレンダー
 
     /**
      * このクラスのコンストラクタ
@@ -22,14 +23,38 @@ public class Subject extends Object implements Comparable<Subject>, Serializable
      * @param name 課題のタイトル
      * @param aDescription 課題の内容
      * @param aCourseName コースの名前
-     * @param aCalendar 課題の日時を表すカレンダー
+     * @param start 課題の開始時間を持つカレンダー
+     * @param end 課題終了時間を持つカレンダー
      */
-    public Subject(Integer eventId,String name,String aDescription,String aCourseName,Calendar aCalendar){
+    public Subject(Integer eventId,String name,String aDescription,String aCourseName,Calendar start,Calendar end){
         this.id = eventId;
         this.subjectTitle = name;
         this.description = aDescription;
         this.courseName = aCourseName;
-        this.calendar = aCalendar;
+        this.startTime = start;
+        this.endTime = end;
+    }
+
+    /**
+     *　この課題の代表となる時間をミリ秒で返す
+     * @return 代表となるミリ秒
+     */
+    public long getRepresentativeTime() {
+       if(this.isAlreadyStarted()) return this.endTime.getTimeInMillis();
+       return this.startTime.getTimeInMillis();
+    }
+
+    /**
+     * この課題がすでに始まっているか
+     * @return 始まっているならtrue、それ以外ならfalse
+     */
+    public boolean isAlreadyStarted(){
+        if (this.startTime != null) {
+            if (this.startTime.getTimeInMillis() > System.currentTimeMillis()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -57,11 +82,38 @@ public class Subject extends Object implements Comparable<Subject>, Serializable
     }
 
     /**
-     * この課題のカレンダーを返す
+     * この課題開始時間を返す
+     * 開始時間が存在しない場合はnullを返す
      * @return この課題のカレンダー
      */
-    public Calendar getCalendar(){
-        return this.calendar;
+    public Calendar getStartTime(){
+        return this.startTime;
+    }
+
+    /**
+     * 開始時間を変更する
+     * @param aCalendar 変更する時間
+     */
+    public void setStartTime(Calendar aCalendar){
+        this.startTime = aCalendar;
+        return;
+    }
+
+    /**
+     * この課題の終了時間を返す
+     * @return この課題のカレンダー
+     */
+    public Calendar getEndTime(){
+        return this.endTime;
+    }
+
+    /**
+     * 終了時間を変更する
+     * @param aCalendar 変更する時間
+     */
+    public void setEndTime(Calendar aCalendar){
+        this.endTime = aCalendar;
+        return;
     }
 
     /**
@@ -74,13 +126,16 @@ public class Subject extends Object implements Comparable<Subject>, Serializable
     }
 
     /**
-     * このクラスの自然順序で与えられたSubject型と比較
-     * 自然順序はカレンダーの日時
+     * このクラスの代表となる時間で、与えられたSubject型と比較
      * @param targetSubject 比較対象
      * @return この課題が与えられた課題よりも日時が速いなら-1、遅いなら1、同じなら0
      */
     public int compareTo(Subject targetSubject){
-        return this.calendar.compareTo(targetSubject.getCalendar());
+        long aMillis = this.getRepresentativeTime();
+        long anotherMillis = targetSubject.getRepresentativeTime();
+        if(aMillis>anotherMillis)return 1;
+        else if(aMillis<anotherMillis)return -1;
+        return 0;
     }
 
     /**

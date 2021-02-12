@@ -5,6 +5,8 @@
     <string name="subject">課題</string>
     <string name="no_schedule_text">課題がありません\n下にスワイプして更新してください。</string>
     <string name="title_menu_view">課題名/コース名</string>
+    <string name="startTime_menu_view">開始まで</string>
+    <string name="endTime_menu_view">終了まで</string>
     <string name="deadline_menu_view">締め切りまで</string>
 
 </resources>

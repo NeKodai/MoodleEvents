@@ -41,98 +41,18 @@ public class Model extends Object{
      * @param jsonString json形式の文字列
      */
     public void addCalendarSchedules(String jsonString){
-        List<Subject> subjectList = this.jsonToSubjectList(jsonString);
-        this.scheduleList.clear();
-        this.addSchedule(subjectList);
-        this.sortScheduleByCalendar();
-        this.mainActivity.notifyFinCalendarUpdate();
-        this.notifyUpdate();
-        return;
-    }
-
-    /**
-     * Json形式で渡されてきたイベントデータをSubject型を持つリストへ変換
-     * @param jsonString Json形式の文字列
-     */
-    private List<Subject> jsonToSubjectList(String jsonString){
-        List<ArrayList> yearDataList =  new Gson().fromJson(jsonString, List.class);
-        List<Subject> subjectList = new ArrayList<>();
-        for(ArrayList aList  : yearDataList) {
-            LinkedTreeMap jsonMap = (LinkedTreeMap) aList.get(0);
-            LinkedTreeMap dataTreeMap = (LinkedTreeMap) jsonMap.get("data");
-            LinkedTreeMap dateTreeMap = (LinkedTreeMap) dataTreeMap.get("date");
-            Integer year = ((Double)dateTreeMap.get("year")).intValue();
-            Integer month = ((Double)dateTreeMap.get("mon")).intValue();
-            ArrayList<LinkedTreeMap> weekMap =(ArrayList<LinkedTreeMap>) dataTreeMap.get("weeks");
-            for(LinkedTreeMap weekTreeMap : weekMap){
-                ArrayList<LinkedTreeMap> days = (ArrayList<LinkedTreeMap>)weekTreeMap.get("days");
-                for(LinkedTreeMap dayTreeMap :days){
-                    //イベントを持っているか
-                    if(!(boolean)dayTreeMap.get("hasevents")){
-                        continue;
-                    }
-                    //日を取得
-                    Integer day = ((Double) dayTreeMap.get("mday")).intValue();
-                    //イベント情報取得
-                    ArrayList<LinkedTreeMap> events = (ArrayList)dayTreeMap.get("events");
-                    for(LinkedTreeMap eventTreeMap : events){
-                        //各イベントデータ取得
-                        //イベントタイプを取得。
-                        String courseName = (String)eventTreeMap.get("calendareventtype");
-                        //コースイベントならそのまま、それ以外ならイベントを後ろにつける
-                        if(courseName.equals("course")) {
-                            courseName = (String) ((LinkedTreeMap) eventTreeMap.get("course")).get("fullname");
-                        }
-                        else{
-                            courseName+="イベント";
-                        }
-                        String title = ((String)eventTreeMap.get("name")).replaceAll("( の提出期限が到来しています。)$","");
-                        String description = (String)eventTreeMap.get("description");
-                        if(description.equals("")){
-                            description = "<p></p>";
-                        }
-                        String formattedTime =(String)eventTreeMap.get("formattedtime");
-
-                        Integer eventId = ((Double)eventTreeMap.get("id")).intValue();
-                        //時刻を取得
-                        String timeString = HtmlCompat.fromHtml(formattedTime,HtmlCompat.FROM_HTML_MODE_COMPACT).toString();
-                        //ユーザイベント対策　最初の時間しか採用されない不具合あり
-                        Pattern aPattern = Pattern.compile("[0-9][0-9]:[0-9][0-9]");
-                        Matcher aMacher = aPattern.matcher(timeString);
-                        while(aMacher.find()){
-                            System.out.println(aMacher.group());
-                        }
-                        System.out.println("-------------------------");
-
-                        timeString = timeString.replaceAll(".*(年|月|日|, )","");
-                        String[] timeStringArray = timeString.split("(:| » )");
-                        //時間の文字列を整数に変換
-                        List<Integer> timeArray = new ArrayList<>();
-                        for(String aString:timeStringArray){
-                            timeArray.add(Integer.valueOf(aString));
-                        }
-                        Integer hour = timeArray.get(0);
-                        Integer minute = timeArray.get(1);
-                        //カレンダー設定
-                        Calendar aCalendar = Calendar.getInstance();
-                        aCalendar.set(year,month-1,day,hour,minute,0);
-                        //現在時刻よりもカレンダーの予定が過去のものなら保存しない
-                        if(aCalendar.getTimeInMillis()<System.currentTimeMillis())
-                            continue;
-
-                        Subject aSubject = new Subject(eventId,title,description,courseName,aCalendar);
-//                        System.out.println(aSubject.getTitle());
-//                        System.out.println(aCalendar.get(Calendar.YEAR));
-//                        System.out.println(aCalendar.get(Calendar.MONTH)+1);
-//                        System.out.println(aCalendar.get(Calendar.DATE));
-//                        System.out.println(aCalendar.get(Calendar.HOUR_OF_DAY));
-//                        System.out.println(aCalendar.get(Calendar.MINUTE));
-                        subjectList.add(aSubject);
-                    }
-                }
-            }
+        try {
+            List<Subject> subjectList = SubjectUtility.calendarJsonToSubjectList(jsonString);
+            this.scheduleList.clear();
+            this.addSchedule(subjectList);
+            this.sortScheduleByCalendar();
+            this.mainActivity.notifyFinCalendarUpdate();
+            this.notifyUpdate();
+        }catch (Exception anException){
+            anException.printStackTrace();
+            this.notifyFailedCalendarUpdate();
         }
-        return subjectList;
+        return;
     }
 
     /**
@@ -148,6 +68,7 @@ public class Model extends Object{
         for(JsonElement e : aJsonArray){
             this.scheduleList.add(gson.fromJson(e,Subject.class));
         }
+        this.notifyUpdate();
         return;
     }
 
@@ -235,8 +156,8 @@ public class Model extends Object{
         Iterator<Subject> anIterator = this.scheduleList.iterator();
         while(anIterator.hasNext()){
             Subject aSubject = anIterator.next();
-            if(aSubject.getCalendar().getTimeInMillis()<System.currentTimeMillis()){
-                anIterator.remove();
+            if(aSubject.getRepresentativeTime()<System.currentTimeMillis()){
+                //anIterator.remove();
             }
         }
         this.notifyUpdate();
@@ -247,12 +168,7 @@ public class Model extends Object{
      * モデルの内容が変化したことを全ての依存物に通知
      */
     public void notifyUpdate(){
-        this.handler.post(new Runnable() {
-            @Override
-            public void run() {
-                mainActivity.update();
-            }
-        });
+        this.mainActivity.update();
         return;
     }
 

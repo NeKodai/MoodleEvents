@@ -17,7 +17,7 @@ import java.util.List;
 public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.ViewHolder> {
 
     private List<Subject> eventList;
-    private Model aModel;
+    private Model model;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -38,9 +38,9 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
     }
 
     // Provide a suitable constructor (depends on the kind of subjectList)
-    EventListAdapter(Model aModel) {
-        this.aModel = aModel;
-        this.eventList = aModel.getScheduleList();
+    EventListAdapter(Model model) {
+        this.model = model;
+        this.eventList = new ArrayList<Subject>();
     }
 
     // Create new views (invoked by the layout manager)
@@ -88,7 +88,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
      */
     private void setDeadLineString(TextView deadLineTextView,Integer position){
         Long currentMillis = System.currentTimeMillis();
-        Long targetMillis = this.eventList.get(position).getCalendar().getTimeInMillis();
+        Long targetMillis = this.eventList.get(position).getRepresentativeTime();
         Long diffMillis = targetMillis-currentMillis;
         // ミリ秒から秒へ変換
         Long diffSeconds = diffMillis / 1000;
@@ -121,6 +121,15 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
             deadLineTextView.setTextColor(Color.parseColor("#008D56"));
         }
         return;
+    }
+
+    /**
+     * モデルのデータを取得し、このアダプタのリストを更新
+     */
+    public void modelDataUpdate(){
+        this.eventList.clear();
+        this.eventList.addAll(this.model.getScheduleList());
+        this.notifyDataSetChanged();
     }
 
     /**

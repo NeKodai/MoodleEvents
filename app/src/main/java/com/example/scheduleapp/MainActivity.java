@@ -35,7 +35,12 @@ public class MainActivity extends AppCompatActivity {
     private SwipeRefreshLayout swipeRefreshLayout;
     private TextView noScheduleText;
     private Timer timer;
+    private Handler handler;
 
+    /**
+     * ビューの初期設定
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +54,8 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         //ファイルユーティリティ初期化
         FileUtility.initialize(getApplicationContext());
+
+        this.handler = new Handler();
         this.model = new Model(this,new Handler());
         this.aScheduleGetter = new ScheduleGetter(this.model,aWebView);
         aWebView.addJavascriptInterface(new JsInterface(this,this.model,this.aScheduleGetter),"Android");
@@ -80,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
         //予定表を読み込む
         try {
             this.model.readSchedule(FileUtility.readFile("schedule.json"));
+            this.rAdapter.modelDataUpdate();
         }catch (IOException anException){
             Toast.makeText(this,"正しく読み込めませんでした",Toast.LENGTH_LONG).show();
         }
@@ -90,13 +98,18 @@ public class MainActivity extends AppCompatActivity {
      * ビューの依存物に対して更新通知をする
      */
     public void update(){
-        this.rAdapter.notifyDataSetChanged();
-        if(this.model.getScheduleList().isEmpty()){
-            this.noScheduleText.setText("課題がありません。\n下にスワイプして更新してください。");
-        }
-        else{
-            this.noScheduleText.setText("");
-        }
+        this.handler.post(new Runnable() {
+            @Override
+            public void run() {
+                rAdapter.modelDataUpdate();
+                if(model.getScheduleList().isEmpty()){
+                    noScheduleText.setText("課題がありません。\n下にスワイプして更新してください。");
+                }
+                else{
+                    noScheduleText.setText("");
+                }
+            }
+        });
         return;
     }
 
@@ -126,6 +139,9 @@ public class MainActivity extends AppCompatActivity {
         return;
     }
 
+    /**
+     * このアクティビティの読み込みが完了したときの処理
+     */
     @Override
     protected void onStart(){
         super.onStart();
@@ -134,13 +150,21 @@ public class MainActivity extends AppCompatActivity {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                model.scheduleUpdate();
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        rAdapter.notifyDataSetChanged();
+                    }
+                });
             }
         },0,1000);
         return;
 
     }
 
+    /**
+     * このアクティビティから画面が離れた時の処理
+     */
     @Override
     protected void onPause(){
         this.timer.cancel();
@@ -149,6 +173,11 @@ public class MainActivity extends AppCompatActivity {
         return;
     }
 
+    /**
+     * メニュー画面を作成
+     * @param menu
+     * @return true
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
