@@ -16,6 +16,7 @@ public class Subject extends Object implements Comparable<Subject>, Serializable
     private String courseName; //コースの名前
     private Calendar startTime; //課題の開始時間を持つカレンダー
     private Calendar endTime; //課題終了時間を持つカレンダー
+    private Boolean isSubmit; //提出済みか
 
     /**
      * このクラスのコンストラクタ
@@ -114,6 +115,22 @@ public class Subject extends Object implements Comparable<Subject>, Serializable
     public void setEndTime(Calendar aCalendar){
         this.endTime = aCalendar;
         return;
+    }
+
+    /**
+     * 提出判定を設定する
+     * @param aBoolean
+     */
+    public void setSubmit(Boolean aBoolean){
+        this.isSubmit = aBoolean;
+    }
+
+    /**
+     * 提出済みか
+     * @return 提出済みならtrue、それ以外ならfalse
+     */
+    public Boolean isSubmit(){
+        return this.isSubmit;
     }
 
     /**

@@ -28,7 +28,6 @@ public class SubjectUtility {
         List<ArrayList> yearDataList =  new Gson().fromJson(jsonString,List.class);
         List<Subject> subjectList = new ArrayList<>();
         Map<Integer,Subject> subjectMap= new HashMap<>();
-
         for(ArrayList aList  : yearDataList) {
             LinkedTreeMap jsonMap = (LinkedTreeMap) aList.get(0);
             LinkedTreeMap dataTreeMap = (LinkedTreeMap) jsonMap.get("data");

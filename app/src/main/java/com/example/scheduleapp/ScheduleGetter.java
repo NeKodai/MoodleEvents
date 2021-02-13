@@ -105,7 +105,7 @@ public class ScheduleGetter extends Object{
      */
     private void getCalendarEvents(){
         try {
-            String script = FileUtility.readAssets("getCalendarSchedule.js");
+            String script = FileUtility.readAssets("test.js");
             this.hiddenView.evaluateJavascript(script, null);
         }
         catch (IOException anException){
