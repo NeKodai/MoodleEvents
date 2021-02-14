@@ -34,6 +34,7 @@ public class Subject extends Object implements Comparable<Subject>, Serializable
         this.courseName = aCourseName;
         this.startTime = start;
         this.endTime = end;
+        this.isSubmit = true;
     }
 
     /**
@@ -57,6 +58,12 @@ public class Subject extends Object implements Comparable<Subject>, Serializable
         }
         return true;
     }
+
+    /**
+     * この課題のIDを返す
+     * @return この課題のID
+     */
+    public Integer getId(){ return this.id; }
 
     /**
      * この課題のタイトルを返す

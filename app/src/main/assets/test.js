@@ -109,17 +109,15 @@ class ActionProcess {
             }
             this.results.push(result);
         }
-        console.log(JSON.stringify(this.results));
         return 1
     }
-
 }
 async function get() {
     try {
         var sess = YUI.config["global"]["M"]["cfg"]["sesskey"];
         var url = "https://cclms.kyoto-su.ac.jp/lib/ajax/service.php?sesskey=" + sess + "&info=core_calendar_get_calendar_monthly_view";
         var date = new Date();
-        var nowMonth = date.getMonth() + 1;
+        var nowMonth = date.getMonth() + 1-1;
         var nowYear = date.getFullYear();
         var time = new Date().getTime() / 1000 | 0; // |0は小数点切り捨て用
         var ajaxClass = new CalendarProcess(url);
@@ -149,9 +147,8 @@ async function get() {
             );
         console.log(JSON.stringify(ajaxClass.results));
         console.log(JSON.stringify(actionClass.results));
-        console.log(ajaxClass.results.length);
-        console.log(actionClass.results.length);
-        //Android.add(JSON.stringify(ajaxClass.results));
+        var resultsList = [ajaxClass.results,actionClass.results];
+        Android.add(JSON.stringify(resultsList));
     }
     catch (error) {
         console.log(JSON.stringify(error));
