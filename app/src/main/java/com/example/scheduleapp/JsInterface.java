@@ -25,21 +25,14 @@ public class JsInterface extends Object{
     }
 
     /**
-     * カレンダーイベントのJsonを受け取り、スケージュールに追加
-     * @param aString カレンダーイベントのJson文字列
+     * イベントのJsonを受け取り、スケージュールに追加
+     * @param aString イベントのJson文字列
      */
     @JavascriptInterface
     public void add(String aString){
         System.out.println("JS追加処理");
         this.errorCount = 0;
         this.model.addCalendarSchedules(aString);
-
-    }
-
-    @JavascriptInterface
-    public void addActionEvents(String aString){
-
-        System.out.println(aString);
     }
 
     /**

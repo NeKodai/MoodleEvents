@@ -5,17 +5,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.annotation.NonNull;
 
 import android.app.Activity;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.ViewHolder> {
 
@@ -32,12 +29,14 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
         private TextView title;
         private TextView deadLine;
         private TextView course;
+        private ImageView submitState;
 
         ViewHolder(View v) {
             super(v);
             this.title = (TextView)v.findViewById(R.id.title_view);
             this.deadLine = (TextView)v.findViewById(R.id.deadLine_view);
             this.course = (TextView)v.findViewById((R.id.course_view));
+            this.submitState = (ImageView)v.findViewById(R.id.submit_color_view);
         }
     }
 
@@ -75,8 +74,10 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
         // - get element from your subjectList at this position
         // - replace the contents of the view with that element
         holder.title.setText(this.eventList.get(position).getTitle());
-        setDeadLineString(holder.deadLine,position);
         holder.course.setText(this.eventList.get(position).getCourseName());
+        this.setSubmitColor(holder.submitState,this.eventList.get(position));
+        this.setDeadLineString(holder.deadLine,position);
+
     }
 
     // Return the size of your subjectList (invoked by the layout manager)
@@ -85,6 +86,23 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
         return this.eventList.size();
     }
 
+    /**
+     * 提出しているかのイメージビューの色
+     * @param subject 課題データ
+     */
+    private void setSubmitColor(ImageView submitView , Subject subject){
+        Integer color = 0;
+        if(subject.getCourseName().equals("userイベント") || subject.isSubmit() == null){
+            color = ContextCompat.getColor(this.activity,R.color.deadLineEnded);
+        }
+        else if(subject.isSubmit()){
+            color = ContextCompat.getColor(this.activity,R.color.deadLineSafe);
+        }
+        else{
+            color = ContextCompat.getColor(this.activity,R.color.deadLineDanger);
+        }
+        submitView.setColorFilter(color,android.graphics.PorterDuff.Mode.SRC_IN);
+    }
 
     /**
      * 指定された課題の締め切りまでの時間を文字列にして応答する

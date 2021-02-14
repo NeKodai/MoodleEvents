@@ -42,7 +42,7 @@ public class Model extends Object{
      */
     public void addCalendarSchedules(String jsonString){
         try {
-            List<Subject> subjectList = SubjectUtility.calendarJsonToSubjectList(jsonString);
+            List<Subject> subjectList = SubjectUtility.jsonToSubjectList(jsonString);
             this.scheduleList.clear();
             this.addSchedule(subjectList);
             this.sortScheduleByCalendar();

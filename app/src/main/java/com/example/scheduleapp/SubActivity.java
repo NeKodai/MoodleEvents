@@ -1,12 +1,14 @@
 package com.example.scheduleapp;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.text.HtmlCompat;
 
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
+import android.view.contentcapture.ContentCaptureSession;
 import android.widget.TextView;
 import android.text.Spanned;
 
@@ -41,6 +43,7 @@ public class SubActivity extends AppCompatActivity {
         TextView endTime = findViewById(R.id.subject_end_time);
         TextView description = findViewById(R.id.subject_description);
         TextView startOrEnd = findViewById(R.id.start_or_end);
+        TextView submit = findViewById(R.id.submit_view);
         this.untilDeadLineText = findViewById(R.id.subject_until_deadline);
 
         title.setText(aSubject.getTitle());
@@ -66,12 +69,24 @@ public class SubActivity extends AppCompatActivity {
             //開始時刻が定義されていないのでTextViewを消す
             startTime.setVisibility(View.GONE);
             //userイベントなら開始時刻、その他なら提出期限とする
-            String aString = (aSubject.getCourseName().equals("userイベント")) ? "開始時刻　" :"提出期限　";
+            String aString = (aSubject.getCategoryName().equals("user")) ? "開始時刻　" :"提出期限　";
             String endTimeText = aString + DayUtility.createDateString(aSubject.getEndTime());
             endTime.setText(endTimeText);
         }
         startOrEnd.setText((this.aSubject.isAlreadyStarted()) ? "終了まで　" : "開始まで　");
         setUntilDeadLineText();
+
+        //提出状況のテキストの設定
+        if(this.aSubject.getCategoryName().equals("user")){
+            submit.setText("ーーー");
+        }
+        else if(this.aSubject.isSubmit()){
+            submit.setText("提出済");
+            submit.setTextColor(ContextCompat.getColor(this,R.color.deadLineSafe));
+        }else{
+            submit.setText("未提出");
+            submit.setTextColor(ContextCompat.getColor(this,R.color.deadLineDanger));
+        }
     }
 
     /**
@@ -95,12 +110,12 @@ public class SubActivity extends AppCompatActivity {
         Integer seconds = Long.valueOf(diffSeconds%60).intValue();
 
         StringBuilder aBuilder = new StringBuilder();
-        this.untilDeadLineText.setTextColor(Color.parseColor("#008D56"));
+        this.untilDeadLineText.setTextColor(ContextCompat.getColor(this,R.color.deadLineSafe));
         if(diffDay<=1){
-            this.untilDeadLineText.setTextColor(Color.RED);
+            this.untilDeadLineText.setTextColor(ContextCompat.getColor(this,R.color.deadLineDanger));
         }
         else if(diffDay<=3){
-            this.untilDeadLineText.setTextColor(Color.parseColor("#FF9900"));
+            this.untilDeadLineText.setTextColor(ContextCompat.getColor(this,R.color.deadLineWarning));
         }
         if(diffSeconds < 0){
             aBuilder.append("終了");

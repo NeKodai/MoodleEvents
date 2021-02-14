@@ -1,4 +1,4 @@
-async function getProcess(ajaxData,url,results,errorIndex,i){
+async function getProcess(ajaxData, url, results, errorIndex, i) {
     console.log(i);
     console.log(ajaxData);
     var order = {
@@ -11,16 +11,17 @@ async function getProcess(ajaxData,url,results,errorIndex,i){
         contentType: "application/json",
         timeout: 100000
     };
-    const process = new Promise((resolve,reject) => {
-                            $.ajax(url, order).then(function(data){
-                                results.push(data);
-                                resolve(1);
-                             },
-                             function(error){
-                                 console.log("e"+i);
-                                 errorIndex.push(i);
-                                 resolve(new Error());
-                             });});
+    const process = new Promise((resolve, reject) => {
+        $.ajax(url, order).then(function (data) {
+            results.push(data);
+            resolve(1);
+        },
+            function (error) {
+                console.log("e" + i);
+                errorIndex.push(i);
+                resolve(new Error());
+            });
+    });
     return process;
 }
 async function get() {
@@ -39,7 +40,7 @@ async function get() {
             ajaxData.push({
                 index: 0,
                 methodname: "core_calendar_get_calendar_monthly_view",
-                args: { "year": nowYear, "month": nowMonth, "courseid": 1, "categoryid": 0}
+                args: { "year": nowYear, "month": nowMonth, "courseid": 1, "categoryid": 0 }
             });
             ajaxData = JSON.stringify(ajaxData);
             ajaxDataList.push(ajaxData);
@@ -53,16 +54,17 @@ async function get() {
                 contentType: "application/json",
                 timeout: 100000
             };
-            const process = new Promise((resolve,reject) => {
-                                    $.ajax(url, order).then(function(data){
-                                        results.push(data);
-                                        resolve(1);
-                                     },
-                                     function(error){
-                                         console.log("e"+i);
-                                         errorIndex.push(i);
-                                         resolve(new Error());
-                                     });});
+            const process = new Promise((resolve, reject) => {
+                $.ajax(url, order).then(function (data) {
+                    results.push(data);
+                    resolve(1);
+                },
+                    function (error) {
+                        console.log("e" + i);
+                        errorIndex.push(i);
+                        resolve(new Error());
+                    });
+            });
             ajaxList.push(process);
             nowMonth += 1;
             if (nowMonth > 12) {
@@ -70,19 +72,19 @@ async function get() {
                 nowYear += 1;
             }
         }
-        for(let i =0;i<10;i++){
-            await Promise.all(ajaxList).then(function(error){
+        for (let i = 0; i < 10; i++) {
+            await Promise.all(ajaxList).then(function (error) {
                 console.log("promise done");
                 ajaxList.splice(0);
                 console.log(error);
-                if(error){
+                if (error) {
                     console.log(errorIndex);
-                    errorIndex.forEach(index => {ajaxList.push(getProcess(ajaxDataList[index],url,results,errorIndex,index));});
+                    errorIndex.forEach(index => { ajaxList.push(getProcess(ajaxDataList[index], url, results, errorIndex, index)); });
                     console.log(ajaxList);
                     errorIndex.splice(0);
                 }
             });
-            if(!ajaxList.length){
+            if (!ajaxList.length) {
                 break;
             }
         }
@@ -95,16 +97,16 @@ async function get() {
     }
     return;
 }
-async function wait (){
+async function wait() {
     console.log("script executed");
     let flag = true;
-    if(typeof jQuery !== 'undefined' && typeof YUI !=='undefined'){
-         get();
-     }
-    else{
-        await new Promise(resolve => setTimeout(resolve,1000));
+    if (typeof jQuery !== 'undefined' && typeof YUI !== 'undefined') {
+        get();
+    }
+    else {
+        await new Promise(resolve => setTimeout(resolve, 1000));
         Android.error("アクセス不能");
-     }
-}(function () { wait(); })();
+    }
+} (function () { wait(); })();
 
 
