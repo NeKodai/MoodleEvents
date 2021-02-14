@@ -4,6 +4,8 @@ package com.example.scheduleapp;
 import android.renderscript.Sampler;
 import android.webkit.CookieManager;
 import android.webkit.ValueCallback;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -13,12 +15,14 @@ import com.google.gson.Gson;
 import java.io.IOException;
 
 public class ScheduleGetter extends Object{
-    private  WebView hiddenView;
-    private AuthPassWord anAuthPassWord;
-    private UserStatus user;
-    private CookieManager cookieManager;
+    private Model model;
+    private WebView hiddenView; //webview
+    private UserStatus user; // user情報管理クラス
+    private CookieManager cookieManager; // Cookie管理クラス
+    private Integer accessErrorCount = 0; // アクセス不能回数をカウントする変数
 
     public ScheduleGetter(Model model,WebView aView){
+        this.model = model;
         this.hiddenView = aView;
         this.hiddenView.getSettings().setJavaScriptEnabled(true);//javascriptオン
         this.hiddenView.getSettings().setDomStorageEnabled(true); // WebStorageをオン
@@ -30,28 +34,37 @@ public class ScheduleGetter extends Object{
         this.cookieManager.removeAllCookies(null);
         this.cookieManager.setAcceptThirdPartyCookies(this.hiddenView, true);
         this.cookieManager.flush();
-        this.anAuthPassWord = new AuthPassWord();
         this.user = new UserStatus();
         this.user.readUserStatus();
-        this.hiddenView.setWebViewClient(new moodleWebViewClinet());
+        this.hiddenView.setWebViewClient(new moodleWebViewClient());
     }
 
 
     /**
      * moodleログインのためのWebViewClient
      */
-    private class moodleWebViewClinet extends WebViewClient{
+    private class moodleWebViewClient extends WebViewClient{
+        private Integer loginErrorCount = 0; //ログインエラーの回数をカウントする変数
+
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view,url);
             int len = url.length(); //urlの長さ
             char end = url.charAt(len - 1);
             System.out.println(url);
+            if(this.loginErrorCount>10){
+                System.out.println("ログインエラー");
+                accessErrorCount = 0;
+                this.loginErrorCount = 0;
+                model.notifyFailedCalendarUpdate();
+                return;
+            }
             if(url.matches("https://cclms.kyoto-su.ac.jp/")){
                 System.out.println("get schedule");
                 getCalendarEvents();
             }
             else if (url.matches("https://gakunin.kyoto-su.ac.jp/idp/profile/SAML2/Redirect/SSO.execution=.*")) {
+                this.loginErrorCount+=1;
                 view.evaluateJavascript("document.getElementById('username')", new ValueCallback<String>() {
                     @Override
                     public void onReceiveValue(String value) {
@@ -63,7 +76,7 @@ public class ScheduleGetter extends Object{
                         }else { //2段階目の認証
                             System.out.println("second");
                             try {
-                                String script = String.format("document.getElementById('token').value='%s'", anAuthPassWord.getAuthPass(user.getAuthKey()));
+                                String script = String.format("document.getElementById('token').value='%s'", AuthPassWord.getAuthPass(user.getAuthKey()));
                                 view.evaluateJavascript(script, null);
                                 view.evaluateJavascript("var elements=document.getElementsByClassName('form-element form-button')\nelements[0].click()", null);
                             } catch (Exception anException) {
@@ -77,27 +90,33 @@ public class ScheduleGetter extends Object{
             }
         }
         @Override
-        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-            System.out.println(errorCode);
-            if(errorCode < 0){
-                view.loadUrl("https://cclms.kyoto-su.ac.jp/auth/shibboleth/");
+        public void onReceivedError(WebView view, WebResourceRequest request , WebResourceError error) {
+            if(accessErrorCount>10){
+                System.out.println("アクセスエラー");
+                accessErrorCount = 0;
+                this.loginErrorCount = 0;
+                model.notifyFailedCalendarUpdate();
             }
+            else if(request.isForMainFrame()) {
+                failedToAccess();
+            }
+            return;
         }
     }
 
     /**
      * Moodleにログインする
      */
-    public void loadMoodle(){
-        this.loadURL("https://cclms.kyoto-su.ac.jp/auth/shibboleth/");
+    public void failedToAccess(){
+        this.accessErrorCount+=1;
+        this.loadMoodle();
     }
 
     /**
-     * 指定されたURLにアクセスする
-     * @param url URL
+     * Moodleにアクセスする
      */
-    public void loadURL(String url){
-        this.hiddenView.loadUrl(url);
+    public void loadMoodle(){
+        this.hiddenView.loadUrl("https://cclms.kyoto-su.ac.jp/auth/shibboleth/");
     }
 
     /**
@@ -128,5 +147,4 @@ public class ScheduleGetter extends Object{
         }
         return;
     }
-
 }

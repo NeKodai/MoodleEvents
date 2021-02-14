@@ -20,7 +20,7 @@ public class AuthPassWord {
      * @param aKey 秘密鍵の文字列
      * @return 2進数に変換した文字列
      */
-    private String keyTobBinaryString(String aKey) {
+    private static String keyTobBinaryString(String aKey) {
 
         StringBuilder builder = new StringBuilder();
         for (Character aCharacter : aKey.toCharArray()) {
@@ -40,7 +40,7 @@ public class AuthPassWord {
      * @param BinaryString 秘密鍵を2進数に変換した文字列
      * @return byte型の配列
      */
-    private byte[] binaryStringToByteArray(String BinaryString) {
+    private static byte[] binaryStringToByteArray(String BinaryString) {
         List<Byte> aByteList = new ArrayList<>();
         Integer len = BinaryString.length();
         BinaryString = String.format("%-80s", BinaryString).replace(" ", "0");
@@ -67,7 +67,7 @@ public class AuthPassWord {
      * @param timeIndex 時間に対するインデックス番号
      * @return ハッシュ値のbyte型配列
      */
-    private byte[] byteArrayToHash(byte[] byteArray, Long timeIndex)
+    private static byte[] byteArrayToHash(byte[] byteArray, Long timeIndex)
             throws NoSuchAlgorithmException, InvalidKeyException {
 
         SecretKeySpec signKey = new SecretKeySpec(byteArray, "HmacSHA1");
@@ -85,7 +85,7 @@ public class AuthPassWord {
      * @param hashByteArray ハッシュ値のbyte型配列
      * @return ワンタイムパスワードの文字列
      */
-    private String hashToAuthPass(byte[] hashByteArray) {
+    private static String hashToAuthPass(byte[] hashByteArray) {
         Integer offset = hashByteArray[19] & 0xf;
         Long truncatedHash = Long.valueOf(hashByteArray[offset] & 0x7f);
         for (Integer i = 1; i < 4; i++) {
@@ -103,7 +103,7 @@ public class AuthPassWord {
      * byte型の配列を出力する
      * @param byteArray byte型の配列
      */
-    private void printByteArray(byte[] byteArray, String format) {
+    private static void printByteArray(byte[] byteArray, String format) {
         System.out.printf("[");
         String formatNext = format + ", ";
         for (Integer i = 0; i < byteArray.length; i++) {
@@ -121,14 +121,13 @@ public class AuthPassWord {
      * @param secretKey 秘密鍵の文字列
      * @return ワンタイムパスワードの文字列
      */
-    public String getAuthPass(String secretKey) throws NoSuchAlgorithmException, InvalidKeyException {
+    public static String getAuthPass(String secretKey) throws NoSuchAlgorithmException, InvalidKeyException {
         secretKey = secretKey.trim();
         Long TC = System.currentTimeMillis() / 1000L;
         Long timeIndex = ((TC - 0) / 30);
-        String binaryString = this.keyTobBinaryString(secretKey);
-        byte[] byteArray = this.binaryStringToByteArray(binaryString);
-        byte[] hashByteArray = this.byteArrayToHash(byteArray, timeIndex);
-        return this.hashToAuthPass(hashByteArray);
+        String binaryString = keyTobBinaryString(secretKey);
+        byte[] byteArray = binaryStringToByteArray(binaryString);
+        byte[] hashByteArray = byteArrayToHash(byteArray, timeIndex);
+        return hashToAuthPass(hashByteArray);
     }
 }
-

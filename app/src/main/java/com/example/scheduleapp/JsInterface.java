@@ -54,7 +54,7 @@ public class JsInterface extends Object{
             this.model.getHandler().post(new Runnable() {
                 @Override
                 public void run() {
-                    scheduleGetter.loadURL("https://cclms.kyoto-su.ac.jp/auth/shibboleth/");
+                    scheduleGetter.failedToAccess();
                 }
             });
         }
