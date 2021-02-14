@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="after">
+        <item>1カ月先</item>
+        <item>3カ月先</item>
+        <item>6カ月先</item>
+        <item>12カ月先</item>
+    </string-array>
+</resources>

@@ -6,7 +6,6 @@ class CalendarProcess {
         this.errorIndex = [];
         this.url = url;
     }
-
     createCalendarProcess(self, orderData, index) {
         this.ajaxData[index] = orderData;
         var order = {
@@ -60,14 +59,12 @@ class CalendarProcess {
     }
 }
 class ActionProcess {
-
     constructor(url, time) {
         this.results = [];
         this.eventID = 0;
         this.time = time;
         this.url = url;
     }
-
     async processExcecute(self) {
         var errorCount = 0;
         for (let i = 0; i < 10; i++) {
@@ -84,7 +81,6 @@ class ActionProcess {
                 async: true,
                 contentType: "application/json"
             };
-
             const process = new Promise((resolve, reject) => {
                 $.ajax(self.url, order).then(function (data) {
                     result = data;

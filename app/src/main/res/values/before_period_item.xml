@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="before">
+        <item>2カ月前</item>
+        <item>1カ月前</item>
+        <item>1週間前</item>
+        <item>現在</item>
+    </string-array>
+</resources>
