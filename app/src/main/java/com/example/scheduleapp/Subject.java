@@ -13,6 +13,7 @@ public class Subject extends Object implements Comparable<Subject>, Serializable
     private Integer id; //課題のID
     private String subjectTitle; //課題のタイトル
     private String description; //課題の内容
+    private String categoryName; //課題のカテゴリ名（user,course...）
     private String courseName; //コースの名前
     private Calendar startTime; //課題の開始時間を持つカレンダー
     private Calendar endTime; //課題終了時間を持つカレンダー
@@ -27,10 +28,11 @@ public class Subject extends Object implements Comparable<Subject>, Serializable
      * @param start 課題の開始時間を持つカレンダー
      * @param end 課題終了時間を持つカレンダー
      */
-    public Subject(Integer eventId,String name,String aDescription,String aCourseName,Calendar start,Calendar end){
+    public Subject(Integer eventId,String name,String aDescription,String categoryName,String aCourseName,Calendar start,Calendar end){
         this.id = eventId;
         this.subjectTitle = name;
         this.description = aDescription;
+        this.categoryName = categoryName;
         this.courseName = aCourseName;
         this.startTime = start;
         this.endTime = end;
@@ -80,6 +82,12 @@ public class Subject extends Object implements Comparable<Subject>, Serializable
     public String getDescription(){
         return this.description;
     }
+
+    /**
+     * この課題のカテゴリ名を返す
+     * @return この課題のカテゴリ名
+     */
+    public String getCategoryName(){ return this.categoryName; }
 
     /**
      * この課題のカレンダーを返す

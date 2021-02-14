@@ -12,8 +12,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
 
 public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.ViewHolder> {
@@ -38,7 +36,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
             this.title = (TextView)v.findViewById(R.id.title_view);
             this.deadLine = (TextView)v.findViewById(R.id.deadLine_view);
             this.course = (TextView)v.findViewById((R.id.course_view));
-            this.submitState = (ImageView)v.findViewById(R.id.submit_view);
+            this.submitState = (ImageView)v.findViewById(R.id.submit_color_view);
         }
     }
 

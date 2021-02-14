@@ -65,13 +65,15 @@ public class SubjectUtility {
                     ArrayList<LinkedTreeMap> events = (ArrayList) dayTreeMap.get("events");
                     for (LinkedTreeMap eventTreeMap : events) {
                         //各イベントデータ取得
-                        //イベントタイプを取得。
-                        String courseName = (String) eventTreeMap.get("calendareventtype");
+                        //カテゴリ名取得
+                        String categoryName = (String) eventTreeMap.get("calendareventtype");
+                        //コース名
+                        String courseName = "";
                         //コースイベントならそのまま、それ以外ならイベントを後ろにつける
-                        if (courseName.equals("course")) {
+                        if (categoryName.equals("course")) {
                             courseName = (String) ((LinkedTreeMap) eventTreeMap.get("course")).get("fullname");
                         } else {
-                            courseName += "イベント";
+                            courseName = categoryName+"イベント";
                         }
                         String title = ((String) eventTreeMap.get("name")).replaceAll("( の提出期限が到来しています。)$", "");
                         String description = (String) eventTreeMap.get("description");
@@ -116,7 +118,7 @@ public class SubjectUtility {
                             }
                             continue;
                         }
-                        Subject aSubject = new Subject(eventId, title, description, courseName, startTime, endTime);
+                        Subject aSubject = new Subject(eventId, title, description, categoryName,courseName, startTime, endTime);
                         //現在時刻よりもカレンダーの予定が過去のものなら保存しない
 //                        if(aSubject.getRepresentativeTime()<System.currentTimeMillis())
 //                            continue;
