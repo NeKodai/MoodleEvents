@@ -17,7 +17,6 @@ import java.io.IOException;
 public class ScheduleGetter extends Object{
     private Model model;
     private WebView hiddenView; //webview
-    private UserStatus user; // user情報管理クラス
     private CookieManager cookieManager; // Cookie管理クラス
     private Integer accessErrorCount = 0; // アクセス不能回数をカウントする変数
 
@@ -34,8 +33,6 @@ public class ScheduleGetter extends Object{
         this.cookieManager.removeAllCookies(null);
         this.cookieManager.setAcceptThirdPartyCookies(this.hiddenView, true);
         this.cookieManager.flush();
-        this.user = new UserStatus();
-        this.user.readUserStatus();
         this.hiddenView.setWebViewClient(new moodleWebViewClient());
     }
 
@@ -66,8 +63,10 @@ public class ScheduleGetter extends Object{
             else if (url.matches("https://gakunin.kyoto-su.ac.jp/idp/profile/SAML2/Redirect/SSO.execution=.*")) {
                 this.loginErrorCount+=1;
                 view.evaluateJavascript("document.getElementById('username')", new ValueCallback<String>() {
+                    UserStatus user = new UserStatus();
                     @Override
                     public void onReceiveValue(String value) {
+                        user.readUserStatus();
                         if(!value.equals("null")){ //1段階目の認証
                             System.out.println("first");
                             view.evaluateJavascript("document.getElementById('username').value='"+user.getUserId()+"'", null);

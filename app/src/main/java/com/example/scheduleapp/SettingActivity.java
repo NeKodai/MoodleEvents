@@ -3,11 +3,15 @@ package com.example.scheduleapp;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -36,6 +40,8 @@ public class SettingActivity extends AppCompatActivity {
         this.auth_key_text = (TextInputEditText)findViewById(R.id.auth_key_input_text);
         this.before_spinner = (Spinner)findViewById(R.id.before_spinner);
         this.after_spinner = (Spinner)findViewById(R.id.after_spinner);
+        ArrayAdapter afterAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item,getResources().getStringArray(R.array.after));
+        ArrayAdapter beforeAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item,getResources().getStringArray(R.array.before));
 
         if(user.getUserId()!=null){
             this.user_id_text.setText(user.getUserId());
@@ -54,13 +60,40 @@ public class SettingActivity extends AppCompatActivity {
         return;
     }
 
+
+    /**
+     * 期間設定のための選択リスナ
+     */
+    private class periodSelectedListener implements AdapterView.OnItemSelectedListener{
+
+        Boolean isBefore;
+        public periodSelectedListener(boolean isBefore){
+            this.isBefore = isBefore;
+        }
+        @Override
+        public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
+            Spinner spinner = (Spinner)adapterView;
+            if(isBefore){
+                user.setBeforeSpinnerPosition(position);
+            }
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> adapterView) {
+
+        }
+    }
+
+
     /**
      * saveボタンを押した時の処理
      */
     private void saveClick(){
-        this.user.setUserId(this.getText(this.user_id_text));
-        this.user.setPassword(this.getText(this.password_text));
-        this.user.setAuthKey(this.getText(this.auth_key_text));
+        this.user.setUserId(this.getText(this.user_id_text).trim());
+        this.user.setPassword(this.getText(this.password_text).trim());
+        this.user.setAuthKey(this.getText(this.auth_key_text).trim());
+        this.user.setBeforeSpinnerPosition(this.before_spinner.getSelectedItemPosition());
+        this.user.setAfterSpinnerPosition(this.after_spinner.getSelectedItemPosition());
         this.user.writeUserStatus();
         Toast.makeText(this,"保存しました",Toast.LENGTH_SHORT).show();
         return;
