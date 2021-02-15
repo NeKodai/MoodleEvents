@@ -3,6 +3,9 @@ package com.example.scheduleapp;
 import java.util.Calendar;
 import java.util.Locale;
 
+/**
+ * 日付に関するユーティリティ
+ */
 public class DayUtility extends Object{
 
     /**
@@ -14,15 +17,6 @@ public class DayUtility extends Object{
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(millis);
         return calendar;
-    }
-
-    /**
-     * ミリ秒を秒に変換する
-     * @param millis
-     * @return
-     */
-    public static Long millisToSeconds(Long millis){
-        return millis/1000;
     }
 
     /**

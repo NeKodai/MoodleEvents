@@ -15,7 +15,14 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Consumer;
 
+/**
+ * 設定画面のビュー
+ */
 public class SettingActivity extends AppCompatActivity {
 
     private UserStatus user; //ユーザ
@@ -40,8 +47,6 @@ public class SettingActivity extends AppCompatActivity {
         this.auth_key_text = (TextInputEditText)findViewById(R.id.auth_key_input_text);
         this.before_spinner = (Spinner)findViewById(R.id.before_spinner);
         this.after_spinner = (Spinner)findViewById(R.id.after_spinner);
-        ArrayAdapter afterAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item,getResources().getStringArray(R.array.after));
-        ArrayAdapter beforeAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item,getResources().getStringArray(R.array.before));
 
         if(user.getUserId()!=null){
             this.user_id_text.setText(user.getUserId());
@@ -52,30 +57,48 @@ public class SettingActivity extends AppCompatActivity {
         if(user.getAuthKey()!=null){
             this.auth_key_text.setText(user.getAuthKey());
         }
-        this.before_spinner.setSelection(user.getBeforeSpinnerPosition());
-        this.after_spinner.setSelection(user.getAfterSpinnerPosition());
+
+        //期間設定用スピナの設定
+        List<SpinnerItem> beforeItem = SpinnerItem.getBeforeItems();
+        List<SpinnerItem> afterItem = SpinnerItem.getAfterItems();
+        ArrayAdapter<SpinnerItem> afterAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,afterItem);
+        ArrayAdapter<SpinnerItem> beforeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,beforeItem);
+        Integer beforeIndex = beforeItem.indexOf(user.getBeforeSpinnerItem());
+        Integer afterIndex = afterItem.indexOf(user.getAfterSpinnerItem());
+
+        this.before_spinner.setAdapter(beforeAdapter);
+        this.after_spinner.setAdapter(afterAdapter);
+        this.before_spinner.setSelection((beforeIndex==-1)? 0 : beforeIndex);
+        this.after_spinner.setSelection((afterIndex==-1) ? 0:afterIndex);
+        this.before_spinner.setOnItemSelectedListener(new periodSelectedListener(item->this.user.setBeforeSpinnerItem(item)));
+        this.after_spinner.setOnItemSelectedListener(new periodSelectedListener(item->this.user.setAfterSpinnerItem(item)));
 
         Button save = (Button)findViewById(R.id.save);
         save.setOnClickListener(v -> {this.saveClick();});
+
         return;
     }
 
 
     /**
-     * 期間設定のための選択リスナ
+     * 期間設定のスピナのリスナを定義するクラス
      */
-    private class periodSelectedListener implements AdapterView.OnItemSelectedListener{
+    private static class periodSelectedListener implements AdapterView.OnItemSelectedListener{
 
-        Boolean isBefore;
-        public periodSelectedListener(boolean isBefore){
-            this.isBefore = isBefore;
+        Consumer<SpinnerItem> process;
+
+        /**
+         * コンストラクタ
+         * @param process 選択された時に行う処理
+         */
+        public periodSelectedListener(Consumer<SpinnerItem> process){
+            this.process = process;
         }
         @Override
         public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
             Spinner spinner = (Spinner)adapterView;
-            if(isBefore){
-                user.setBeforeSpinnerPosition(position);
-            }
+            SpinnerItem anItem = (SpinnerItem)spinner.getAdapter().getItem(position);
+            process.accept(anItem);
         }
 
         @Override
@@ -92,8 +115,6 @@ public class SettingActivity extends AppCompatActivity {
         this.user.setUserId(this.getText(this.user_id_text).trim());
         this.user.setPassword(this.getText(this.password_text).trim());
         this.user.setAuthKey(this.getText(this.auth_key_text).trim());
-        this.user.setBeforeSpinnerPosition(this.before_spinner.getSelectedItemPosition());
-        this.user.setAfterSpinnerPosition(this.after_spinner.getSelectedItemPosition());
         this.user.writeUserStatus();
         Toast.makeText(this,"保存しました",Toast.LENGTH_SHORT).show();
         return;

@@ -1,5 +1,7 @@
 package com.example.scheduleapp;
 
+import com.google.gson.Gson;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.GeneralSecurityException;
@@ -15,20 +17,26 @@ public class UserStatus extends Object implements Serializable {
     private String password =null; //パスワード
     private String authKey = null; //2段階認証キー
     private SecretKey key = null; //秘密鍵
-    private Integer beforeSpinnerPosition = 0; //過去時間のスピナのインデックス番号
-    private Integer afterSpinnerPosition = 0; //未来時間のスピナのインデックス番号
+    private SpinnerItem beforeSpinnerItem ; //過去時間のスピナのアイテム
+    private SpinnerItem afterSpinnerItem; //未来時間のスピナのアイテム
 
+
+    public UserStatus(){
+        this.beforeSpinnerItem = SpinnerItem.NOW;
+        this.afterSpinnerItem = SpinnerItem.SIX_MONTH_AFTER;
+    }
     /**
      * ユーザ情報をを読み込む
      */
     public void readUserStatus(){
         try {
+            Gson gson = new Gson();
             this.key = KeyUtility.stringToKey(FileUtility.readFile("key"));
             this.userId = FileUtility.readFileByAES("user_id", this.key);
             this.password = FileUtility.readFileByAES("password", this.key);
             this.authKey = FileUtility.readFileByAES("auth_key", this.key);
-            this.beforeSpinnerPosition = Integer.valueOf(FileUtility.readFileByAES("before_period",this.key));
-            this.afterSpinnerPosition = Integer.valueOf(FileUtility.readFileByAES("after_period",this.key));
+            this.beforeSpinnerItem = gson.fromJson(FileUtility.readFileByAES("before_period",this.key),SpinnerItem.class);
+            this.afterSpinnerItem = gson.fromJson(FileUtility.readFileByAES("after_period",this.key),SpinnerItem.class);
         }
         catch (IllegalArgumentException anException){
             anException.printStackTrace();
@@ -48,11 +56,12 @@ public class UserStatus extends Object implements Serializable {
     public void writeUserStatus(){
         try {
             this.key = KeyUtility.generateAESKey();
+            Gson gson = new Gson();
             FileUtility.writeFileByAES("user_id",this.userId,this.key);
             FileUtility.writeFileByAES("password",this.password,this.key);
             FileUtility.writeFileByAES("auth_key",this.authKey,this.key);
-            FileUtility.writeFileByAES("before_period",this.beforeSpinnerPosition.toString(),this.key);
-            FileUtility.writeFileByAES("after_period",this.afterSpinnerPosition.toString(),this.key);
+            FileUtility.writeFileByAES("before_period",gson.toJson(this.beforeSpinnerItem),this.key);
+            FileUtility.writeFileByAES("after_period",gson.toJson(this.afterSpinnerItem),this.key);
             FileUtility.writeFile("key",KeyUtility.keyToString(this.key));
 
         }catch (GeneralSecurityException anException){
@@ -114,34 +123,34 @@ public class UserStatus extends Object implements Serializable {
 
     /**
      * /過去時間のスピナのインデックス番号をセットする
-     * @param aInteger
+     * @param spinnerItem
      */
-    public void setBeforeSpinnerPosition(Integer aInteger){
-        this.beforeSpinnerPosition = aInteger;
+    public void setBeforeSpinnerItem(SpinnerItem spinnerItem){
+        this.beforeSpinnerItem = spinnerItem;
     }
 
     /**
      * /過去時間のスピナのインデックス番号をセットする
      * @return スピナのインデックス番号
      */
-    public Integer getBeforeSpinnerPosition(){
-        return this.beforeSpinnerPosition;
+    public SpinnerItem getBeforeSpinnerItem(){
+        return this.beforeSpinnerItem;
     }
 
     /**
-     * /未来時間のスピナのインデックス番号をセットする
-     * @param aInteger
+     * /未来時間のスピナのアイテムをセットする
+     * @param spinnerItem スピナアイテム
      */
-    public void setAfterSpinnerPosition(Integer aInteger){
-        this.afterSpinnerPosition = aInteger;
+    public void setAfterSpinnerItem(SpinnerItem spinnerItem){
+        this.afterSpinnerItem = spinnerItem;
     }
 
     /**
      * /未来時間のスピナのインデックス番号をセットする
      * @return スピナのインデックス番号
      */
-    public Integer getAfterSpinnerPosition(){
-        return this.afterSpinnerPosition;
+    public SpinnerItem getAfterSpinnerItem(){
+        return this.afterSpinnerItem;
     }
 
     /**

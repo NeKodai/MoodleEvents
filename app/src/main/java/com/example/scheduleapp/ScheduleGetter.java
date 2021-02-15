@@ -1,7 +1,6 @@
 package com.example.scheduleapp;
 
 
-import android.renderscript.Sampler;
 import android.webkit.CookieManager;
 import android.webkit.ValueCallback;
 import android.webkit.WebResourceError;
@@ -10,16 +9,24 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.google.gson.Gson;
-
 import java.io.IOException;
+import java.util.Calendar;
 
+/**
+ * Moodleへのログインおよび課題取得を実行するクラス
+ */
 public class ScheduleGetter extends Object{
-    private Model model;
-    private WebView hiddenView; //webview
+    private Model model; // モデル
+    private WebView hiddenView; //WebView
+    private UserStatus user; //ユーザを管理するクラス
     private CookieManager cookieManager; // Cookie管理クラス
     private Integer accessErrorCount = 0; // アクセス不能回数をカウントする変数
 
+    /**
+     * このクラスのコンストラクタ
+     * @param model モデル
+     * @param aView WebView
+     */
     public ScheduleGetter(Model model,WebView aView){
         this.model = model;
         this.hiddenView = aView;
@@ -34,6 +41,7 @@ public class ScheduleGetter extends Object{
         this.cookieManager.setAcceptThirdPartyCookies(this.hiddenView, true);
         this.cookieManager.flush();
         this.hiddenView.setWebViewClient(new moodleWebViewClient());
+        this.user = new UserStatus();
     }
 
 
@@ -43,11 +51,15 @@ public class ScheduleGetter extends Object{
     private class moodleWebViewClient extends WebViewClient{
         private Integer loginErrorCount = 0; //ログインエラーの回数をカウントする変数
 
+        /**
+         *ページ読み込み完了後の処理
+         * @param view WebView
+         * @param url 読み込んだURL
+         */
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view,url);
-            int len = url.length(); //urlの長さ
-            char end = url.charAt(len - 1);
+
             System.out.println(url);
             if(this.loginErrorCount>10){
                 System.out.println("ログインエラー");
@@ -56,14 +68,15 @@ public class ScheduleGetter extends Object{
                 model.notifyFailedCalendarUpdate();
                 return;
             }
+            //Moodleなら
             if(url.matches("https://cclms.kyoto-su.ac.jp/")){
                 System.out.println("get schedule");
                 getCalendarEvents();
             }
+            //ログインページなら
             else if (url.matches("https://gakunin.kyoto-su.ac.jp/idp/profile/SAML2/Redirect/SSO.execution=.*")) {
                 this.loginErrorCount+=1;
                 view.evaluateJavascript("document.getElementById('username')", new ValueCallback<String>() {
-                    UserStatus user = new UserStatus();
                     @Override
                     public void onReceiveValue(String value) {
                         user.readUserStatus();
@@ -88,6 +101,13 @@ public class ScheduleGetter extends Object{
                 gakuninButtonClick();
             }
         }
+
+        /**
+         * 読み込みエラーの場合の処理
+         * @param view WebView
+         * @param request リクエスト
+         * @param error エラー
+         */
         @Override
         public void onReceivedError(WebView view, WebResourceRequest request , WebResourceError error) {
             if(accessErrorCount>10){
@@ -104,7 +124,8 @@ public class ScheduleGetter extends Object{
     }
 
     /**
-     * Moodleにログインする
+     * アクセスに失敗した場合の処理
+     * エラーカウントを1増加させ、再度Moodleにアクセスする
      */
     public void failedToAccess(){
         this.accessErrorCount+=1;
@@ -115,6 +136,7 @@ public class ScheduleGetter extends Object{
      * Moodleにアクセスする
      */
     public void loadMoodle(){
+        this.user.readUserStatus();
         this.hiddenView.loadUrl("https://cclms.kyoto-su.ac.jp/auth/shibboleth/");
     }
 
@@ -123,7 +145,9 @@ public class ScheduleGetter extends Object{
      */
     private void getCalendarEvents(){
         try {
-            String script = FileUtility.readAssets("test.js");
+            String script = FileUtility.readAssets("getEvents.js");
+            String args = this.makeJsArgumentString();
+            script+="(function () { wait("+args+"); })();";
             this.hiddenView.evaluateJavascript(script, null);
         }
         catch (IOException anException){
@@ -131,6 +155,28 @@ public class ScheduleGetter extends Object{
             System.out.println("js読み込み失敗");
         }
         return;
+    }
+
+    /**
+     * getCalendarEventsで使用するJavaScriptの引数の文字列を作成する
+     * @return 引数の文字列
+     */
+    private String makeJsArgumentString(){
+        SpinnerItem before = this.user.getBeforeSpinnerItem();
+        SpinnerItem after = this.user.getAfterSpinnerItem();
+        Calendar beforeCalendar = Calendar.getInstance();
+        Calendar afterCalendar = Calendar.getInstance();
+        StringBuilder stringBuilder = new StringBuilder();
+        beforeCalendar.add(before.getCalendarField(),before.getAmount());
+        afterCalendar.add(after.getCalendarField(),after.getAmount());
+        stringBuilder.append(beforeCalendar.get(Calendar.YEAR));
+        stringBuilder.append(",");
+        stringBuilder.append(beforeCalendar.get(Calendar.MONTH)+1);
+        stringBuilder.append(",");
+        stringBuilder.append(afterCalendar.get(Calendar.YEAR));
+        stringBuilder.append(",");
+        stringBuilder.append(afterCalendar.get(Calendar.MONTH)+1);
+        return new String(stringBuilder);
     }
 
     /**

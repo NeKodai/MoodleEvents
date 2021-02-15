@@ -6,7 +6,6 @@ import java.util.Objects;
 
 /**
  * 課題を表すクラス
- * 課題のタイトル、内容、日時を持つ
  */
 public class Subject extends Object implements Comparable<Subject>, Serializable {
 
