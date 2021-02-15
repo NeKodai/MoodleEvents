@@ -18,7 +18,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * 1つの課題の詳細の見た目を管理するクラス
+ * 1つの課題の詳細のビュー
  */
 public class SubActivity extends AppCompatActivity {
 

@@ -6,7 +6,6 @@ class CalendarProcess {
         this.errorIndex = [];
         this.url = url;
     }
-
     createCalendarProcess(self, orderData, index) {
         this.ajaxData[index] = orderData;
         var order = {
@@ -60,20 +59,19 @@ class CalendarProcess {
     }
 }
 class ActionProcess {
-
-    constructor(url, time) {
+    constructor(url, startTime,endTime) {
         this.results = [];
         this.eventID = 0;
-        this.time = time;
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.url = url;
     }
-
     async processExcecute(self) {
         var errorCount = 0;
         for (let i = 0; i < 10; i++) {
             var ajaxData = [];
             var result = null;
-            ajaxData.push({ "index": 0, "methodname": "core_calendar_get_action_events_by_timesort", "args": { "limitnum": 10, "timesortfrom": this.time, "limittononsuspendedevents": false, "aftereventid": this.eventID } });
+            ajaxData.push({ "index": 0, "methodname": "core_calendar_get_action_events_by_timesort", "args": { "limitnum": 10, "timesortfrom": this.startTime,"timesortto":this.endTime, "limittononsuspendedevents": false, "aftereventid": this.eventID } });
             ajaxData = JSON.stringify(ajaxData);
             var order = {
                 type: "POST",
@@ -84,7 +82,6 @@ class ActionProcess {
                 async: true,
                 contentType: "application/json"
             };
-
             const process = new Promise((resolve, reject) => {
                 $.ajax(self.url, order).then(function (data) {
                     result = data;
@@ -112,17 +109,31 @@ class ActionProcess {
         return 1
     }
 }
-async function get() {
+async function get(startYear,startMonth,endYear,endMonth) {
     try {
         var sess = YUI.config["global"]["M"]["cfg"]["sesskey"];
         var url = "https://cclms.kyoto-su.ac.jp/lib/ajax/service.php?sesskey=" + sess + "&info=core_calendar_get_calendar_monthly_view";
-        var date = new Date();
-        var nowMonth = date.getMonth() + 1-1;
-        var nowYear = date.getFullYear();
-        var time = new Date().getTime() / 1000 | 0; // |0は小数点切り捨て用
+        var startDate = new Date(startYear,startMonth-1);
+        var nowMonth = startDate.getMonth()+1;
+        var nowYear = startDate.getFullYear();
+        var diffMonth = (endYear-startYear)*12+endMonth-startMonth+1;
+        if(endMonth==12){
+            endYear+=1;
+            endMonth=1;
+        }
+        else{
+            endMonth+=1;
+        }
+        var endDate = new Date(endYear,endMonth-1);
+        var startTime = startDate.getTime() / 1000 | 0; // |0は小数点切り捨て用
+        var endTime = endDate.getTime()/1000|0;
+        console.log(nowMonth);
+        console.log(nowYear);
+        console.log(startTime);
+        console.log(endTime);
         var ajaxClass = new CalendarProcess(url);
-        var actionClass = new ActionProcess(url, 1609426800);
-        for (let i = 0; i < 12; i++) {
+        var actionClass = new ActionProcess(url, startTime,endTime);
+        for (let i = 0; i < diffMonth; i++) {
             var ajaxData = [];
             ajaxData.push({
                 index: 0,
@@ -157,14 +168,14 @@ async function get() {
     }
     return;
 }
-async function wait() {
+async function wait(startYear,startMonth,endYear,endMonth) {
     console.log("script executed");
     let flag = true;
     if (typeof jQuery !== 'undefined' && typeof YUI !== 'undefined') {
-        get();
+        get(startYear,startMonth,endYear,endMonth);
     }
     else {
         await new Promise(resolve => setTimeout(resolve, 1000));
         Android.error("アクセス不能");
     }
-} (function () { wait(); })();
+}//(function () { wait(2021,1,2021,2); })();

@@ -6,123 +6,173 @@
     android:layout_height="match_parent"
     android:layout_margin="10dp">
 
-    <ScrollView
-        android:id="@+id/scrollView2"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:layout_editor_absoluteY="424dp">
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
+        <ScrollView
+            android:id="@+id/scrollView2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_weight="1">
 
-            <TextView
-                android:id="@+id/login_setting"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
-                android:text="学認ログイン用設定"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/user_id"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="ユーザID"
-                android:textColor="#000000"
-                android:textSize="16dp" />
+                android:orientation="vertical">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/user_id_input"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                tools:visibility="visible">
+                <TextView
+                    android:id="@+id/login_setting"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:text="学認ログイン用設定"
+                    android:textSize="14sp" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/user_id_input_text"
+                <TextView
+                    android:id="@+id/user_id"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="ユーザID"
+                    android:textColor="#000000"
+                    android:textSize="16dp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/user_id_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:visibility="visible">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/user_id_input_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
+                        android:hint="例) g1234567"
+                        android:maxLength="8"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:textSize="17sp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="パスワード"
+                    android:textColor="#000000"
+                    android:textSize="16dp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/password_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:passwordToggleEnabled="true">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/password_input_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
+                        android:cursorVisible="true"
+                        android:inputType="textPassword"
+                        android:maxLines="1"
+                        android:paddingTop="10dp"
+                        android:paddingBottom="10dp"
+                        android:selectAllOnFocus="false"
+                        android:singleLine="true"
+                        android:textSize="17sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/auth_key"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="事前共有鍵"
+                    android:textColor="#000000"
+                    android:textSize="16dp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/auth_key_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:passwordToggleEnabled="true">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/auth_key_input_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
+                        android:cursorVisible="true"
+                        android:inputType="textPassword"
+                        android:maxLines="1"
+                        android:textSize="17sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/event_setting"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:layout_marginBottom="10dp"
-                    android:hint="例) g1234567"
-                    android:maxLength="8"
-                    android:maxLines="1"
-                    android:singleLine="true"
-                    android:textSize="17sp" />
+                    android:text="イベント取得設定" />
 
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <TextView
-                android:id="@+id/password"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="パスワード"
-                android:textColor="#000000"
-                android:textSize="16dp" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/password_input"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:passwordToggleEnabled="true"
-                >
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/password_input_text"
+                <TextView
+                    android:id="@+id/period"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp"
-                    android:cursorVisible="true"
-                    android:maxLines="1"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
-                    android:inputType="textPassword"
-                    android:selectAllOnFocus="false"
-                    android:singleLine="true"
-                    android:textSize="17sp" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:text="取得期間設定"
+                    android:textColor="#000000"
+                    android:textSize="16sp" />
 
-            <TextView
-                android:id="@+id/auth_key"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="事前共有鍵(ベータ)"
-                android:textColor="#000000"
-                android:textSize="16dp" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/auth_key_input"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:passwordToggleEnabled="true"
-                >
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/auth_key_input_text"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_marginTop="10dp"
                     android:layout_marginBottom="10dp"
-                    android:maxLines="1"
-                    android:cursorVisible="true"
-                    android:inputType="textPassword"
-                    android:textSize="17sp" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:orientation="horizontal">
 
-        </LinearLayout>
-    </ScrollView>
+                    <Spinner
+                        android:id="@+id/before_spinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
 
-    <Button
-        android:id="@+id/save"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/button_color_state"
-        android:text="保存"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+                    <TextView
+                        android:id="@+id/textView3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="～"
+                        android:textAlignment="center"
+                        android:textColor="#000000" />
+
+                    <Spinner
+                        android:id="@+id/after_spinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </ScrollView>
+
+        <Button
+            android:id="@+id/save"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:background="@drawable/button_color_state"
+            android:text="保存" />
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

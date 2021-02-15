@@ -20,15 +20,20 @@ import java.util.stream.Collectors;
 /**
  * Subjectクラスに関するユーティリティ
  */
-public class SubjectUtility {
+public class SubjectUtility extends Object{
 
-
+    /**
+     * Json文字列からSubject型を持つリストへ変換する
+     * @param jsonString
+     * @return
+     */
     public static List<Subject> jsonToSubjectList(String jsonString) {
         List<ArrayList> aList = new Gson().fromJson(jsonString, List.class);
         List<ArrayList> calendarList = aList.get(0);
         List<ArrayList> actionList = aList.get(1);
         List<Subject> subjectList = calendarListToSubjectList(calendarList);
         HashSet<Integer> idSet = actionListToIdSet(actionList);
+        //提出判定
         subjectList.forEach(subject -> {
             if(idSet.contains(subject.getId())) subject.setSubmit(false);
         });
@@ -36,7 +41,7 @@ public class SubjectUtility {
     }
 
     /**
-     * Json形式で渡されてきたイベントデータをSubject型を持つリストへ変換
+     * Json形式で渡されてきたカレンダーイベントデータをSubject型を持つリストへ変換
      *
      * @param calenderList カレンダーイベントのリスト
      * @return Subject型のリスト
@@ -123,10 +128,10 @@ public class SubjectUtility {
 //                        if(aSubject.getRepresentativeTime()<System.currentTimeMillis())
 //                            continue;
 
-                        System.out.println(aSubject.getTitle());
-                        if (aSubject.getStartTime() != null)
-                            System.out.println(aSubject.getStartTime().getTime());
-                        System.out.println(aSubject.getEndTime().getTime());
+//                        System.out.println(aSubject.getTitle());
+//                        if (aSubject.getStartTime() != null)
+//                            System.out.println(aSubject.getStartTime().getTime());
+//                        System.out.println(aSubject.getEndTime().getTime());
                         subjectList.add(aSubject);
                         subjectMap.put(eventId, aSubject);
                     }
@@ -138,7 +143,7 @@ public class SubjectUtility {
 
     /**
      * アクションイベントのjson文字列からイベントのIDのハッシュセットを返す
-     *
+     * ハッシュセットは提出判定に使用する
      * @param actionList アクションイベントのリスト
      * @return IDのハッシュセット
      */
