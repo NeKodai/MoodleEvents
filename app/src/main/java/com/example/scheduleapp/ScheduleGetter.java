@@ -71,7 +71,7 @@ public class ScheduleGetter extends Object{
             //Moodleなら
             if(url.matches("https://cclms.kyoto-su.ac.jp/")){
                 System.out.println("get schedule");
-                getCalendarEvents();
+                //getCalendarEvents();
             }
             //ログインページなら
             else if (url.matches("https://gakunin.kyoto-su.ac.jp/idp/profile/SAML2/Redirect/SSO.execution=.*")) {
@@ -138,6 +138,13 @@ public class ScheduleGetter extends Object{
     public void loadMoodle(){
         this.user.readUserStatus();
         this.hiddenView.loadUrl("https://cclms.kyoto-su.ac.jp/auth/shibboleth/");
+    }
+
+    /**
+     * 
+     */
+    private void createCalendarEvent(){
+
     }
 
     /**
