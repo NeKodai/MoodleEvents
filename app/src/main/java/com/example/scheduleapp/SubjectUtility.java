@@ -161,8 +161,7 @@ public class SubjectUtility extends Object{
     }
 
     public static void main(String... args){
-        Subject subject = new Subject(-1,"aaa","iii","user","user", null,Calendar.getInstance());
-        System.out.println(new Gson().toJson(subject));
+
     }
 }
 

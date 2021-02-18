@@ -83,6 +83,14 @@ public class Subject extends Object implements Comparable<Subject>, Serializable
     }
 
     /**
+     * この課題の内容をセットする
+     * @param aString 内容
+     */
+    public void setDescription(String aString){
+        this.description = aString;
+    }
+
+    /**
      * この課題のカテゴリ名を返す
      * @return この課題のカテゴリ名
      */
@@ -146,6 +154,17 @@ public class Subject extends Object implements Comparable<Subject>, Serializable
     public Boolean isSubmit(){
         return this.isSubmit;
     }
+
+    /**
+     * この課題のシャローコピーを返す
+     * @return この課題のコピー
+     */
+    public Subject clone(){
+        Subject aSubject = new Subject(this.id,this.subjectTitle,this.description,this.categoryName,this.courseName,this.startTime,this.endTime);
+        aSubject.setSubmit(this.isSubmit);
+        return aSubject;
+    }
+
 
     /**
      * このクラスを文字列にして返す

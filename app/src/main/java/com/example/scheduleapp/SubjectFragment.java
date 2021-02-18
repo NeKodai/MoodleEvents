@@ -1,50 +1,48 @@
 package com.example.scheduleapp;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import androidx.core.text.HtmlCompat;
-
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.View;
-import android.view.contentcapture.ContentCaptureSession;
-import android.widget.TextView;
 import android.text.Spanned;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
-import java.util.Calendar;
-import java.util.Locale;
+import androidx.core.content.ContextCompat;
+import androidx.core.text.HtmlCompat;
+import androidx.fragment.app.Fragment;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
-/**
- * 1つの課題の詳細のビュー
- */
-public class SubActivity extends AppCompatActivity {
+public class SubjectFragment extends Fragment {
 
     private TextView untilDeadLineText;
     private Handler handler;
     private Subject aSubject;
     private Timer timer;
 
-    /**
-     * ビューの初期設定
-     */
+    // Fragmentで表示するViewを作成するメソッド
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
+        // 先ほどのレイアウトをここでViewとして作成します
+        return inflater.inflate(R.layout.subject_view, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        
         this.handler = new Handler();
-        this.aSubject = (Subject)getIntent().getSerializableExtra("subject");
-        setContentView(R.layout.subject_view);
-        TextView title = findViewById(R.id.subject_title);
-        TextView course = findViewById(R.id.subject_course);
-        TextView startTime = findViewById(R.id.subject_start_time);
-        TextView endTime = findViewById(R.id.subject_end_time);
-        TextView description = findViewById(R.id.subject_description);
-        TextView startOrEnd = findViewById(R.id.start_or_end);
-        TextView submit = findViewById(R.id.submit_view);
-        this.untilDeadLineText = findViewById(R.id.subject_until_deadline);
+        this.aSubject = (Subject) getArguments().getSerializable("subject");
+        TextView title = view.findViewById(R.id.subject_title);
+        TextView course = view.findViewById(R.id.subject_course);
+        TextView startTime = view.findViewById(R.id.subject_start_time);
+        TextView endTime = view.findViewById(R.id.subject_end_time);
+        TextView description = view.findViewById(R.id.subject_description);
+        TextView startOrEnd = view.findViewById(R.id.start_or_end);
+        TextView submit = view.findViewById(R.id.submit_view);
+        this.untilDeadLineText = view.findViewById(R.id.subject_until_deadline);
 
         title.setText(aSubject.getTitle());
         course.setText(aSubject.getCourseName());
@@ -82,10 +80,10 @@ public class SubActivity extends AppCompatActivity {
         }
         else if(this.aSubject.isSubmit()){
             submit.setText("提出済");
-            submit.setTextColor(ContextCompat.getColor(this,R.color.deadLineSafe));
+            submit.setTextColor(ContextCompat.getColor(getContext(),R.color.deadLineSafe));
         }else{
             submit.setText("未提出");
-            submit.setTextColor(ContextCompat.getColor(this,R.color.deadLineDanger));
+            submit.setTextColor(ContextCompat.getColor(getContext(),R.color.deadLineDanger));
         }
     }
 
@@ -110,12 +108,12 @@ public class SubActivity extends AppCompatActivity {
         Integer seconds = Long.valueOf(diffSeconds%60).intValue();
 
         StringBuilder aBuilder = new StringBuilder();
-        this.untilDeadLineText.setTextColor(ContextCompat.getColor(this,R.color.deadLineSafe));
+        this.untilDeadLineText.setTextColor(ContextCompat.getColor(getContext(),R.color.deadLineSafe));
         if(diffDay<=1){
-            this.untilDeadLineText.setTextColor(ContextCompat.getColor(this,R.color.deadLineDanger));
+            this.untilDeadLineText.setTextColor(ContextCompat.getColor(getContext(),R.color.deadLineDanger));
         }
         else if(diffDay<=3){
-            this.untilDeadLineText.setTextColor(ContextCompat.getColor(this,R.color.deadLineWarning));
+            this.untilDeadLineText.setTextColor(ContextCompat.getColor(getContext(),R.color.deadLineWarning));
         }
         if(diffSeconds < 0){
             aBuilder.append("終了");
@@ -142,19 +140,10 @@ public class SubActivity extends AppCompatActivity {
     }
 
     /**
-     * 戻るボタンを押した時の処理
-     */
-    @Override
-    public boolean onSupportNavigateUp() {
-        finish();
-        return super.onSupportNavigateUp();
-    }
-
-    /**
      * このアクティビティの読み込みが完了したときの処理
      */
     @Override
-    protected void onStart(){
+    public void onStart(){
         super.onStart();
         //1秒毎にデータを更新
         this.timer = new Timer();
@@ -175,7 +164,7 @@ public class SubActivity extends AppCompatActivity {
      * このアクティビティから画面が離れた時の処理
      */
     @Override
-    protected void onPause(){
+    public void onPause(){
         this.timer.cancel();
         super.onPause();
         System.out.println("中断しました");
