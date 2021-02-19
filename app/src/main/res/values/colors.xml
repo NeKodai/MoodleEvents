@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#FF008577</color>
+    <color name="colorPrimary">#FF8400</color>
     <color name="colorPrimaryDark">#FF00574B</color>
-    <color name="colorAccent">#FFD81B60</color>
+    <color name="colorAccent">#FFAA00</color>
     <color name="colorSelect">#FFD1D1D1</color>
     <color name="colorWhite">#FFFFFFFF</color>
-    <color name="saveButton">#FF357B</color>
-    <color name="saveButtonPushed">#AF315D</color>
+    <color name="saveButton">#FFAA00</color>
+    <color name="saveButtonPushed">#A16B00</color>
+    <color name="garbageButton">#FFFFFF</color>
     <color name="deadLineEnded">#535353</color>
     <color name="deadLineDanger">#EA0000</color>
     <color name="deadLineWarning">#FF9900</color>

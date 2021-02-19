@@ -58,6 +58,7 @@ public class SubjectFragment extends Fragment {
         this.progressDialog.setMessage("削除中");
         this.progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         this.progressDialog.setCanceledOnTouchOutside(false);
+        this.progressDialog.setCancelable(false);
         this.yesNoDialog = new AlertDialog.Builder(getContext())
                 .setTitle("課題削除")
                 .setMessage("この課題を削除しますか")
@@ -160,17 +161,16 @@ public class SubjectFragment extends Fragment {
             if(getActivity()!=null) getActivity().getSupportFragmentManager().popBackStack();
         }catch (IOException anException){
             anException.printStackTrace();
-            Toast.makeText(this.getContext(),"正しく書き込めませんでした",Toast.LENGTH_LONG).show();
-            this.failedDeleteEvent();
+            this.failedDeleteEvent("課題の保存に失敗しました");
         }
     }
 
     /**
      * スケジュールの更新に失敗した場合の処理
      */
-    public void failedDeleteEvent(){
+    public void failedDeleteEvent(String massage){
         this.progressDialog.dismiss();
-        Toast.makeText(this.getContext(), "削除に失敗しました。", Toast.LENGTH_LONG).show();
+        Toast.makeText(this.getContext(), massage, Toast.LENGTH_LONG).show();
         return;
     }
 

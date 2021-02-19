@@ -43,8 +43,8 @@ public class CreateFragmentModel extends Model{
     /**
      * イベントの作成に失敗したことを通知
      */
-    public void notifyFailedCalendarUpdate(){
-        this.createFragment.failedCalendarUpdate();
+    public void notifyFailedCalendarUpdate(String message){
+        this.createFragment.failedCalendarUpdate(message);
         return;
     }
 }

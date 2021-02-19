@@ -43,8 +43,8 @@ public class SubjectFragmentModel extends Model{
     /**
      * イベントの削除に失敗したことを通知
      */
-    public void notifyFailedDeleteEvent(){
-        this.SubjectFragment.failedDeleteEvent();
+    public void notifyFailedDeleteEvent(String message){
+        this.SubjectFragment.failedDeleteEvent(message);
         return;
     }
 }

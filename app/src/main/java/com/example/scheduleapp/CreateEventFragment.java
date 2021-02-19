@@ -70,13 +70,14 @@ public class CreateEventFragment extends Fragment {
         this.progressDialog.setMessage("作成中");
         this.progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         this.progressDialog.setCanceledOnTouchOutside(false);
+        this.progressDialog.setCancelable(false);
 
         this.model = new CreateFragmentModel(this);
         //予定表を読み込む
         try {
             this.model.readSchedule(FileUtility.readFile("schedule.json"));
         }catch (IOException anException){
-            Toast.makeText(getContext(),"正しく読み込めませんでした",Toast.LENGTH_LONG).show();
+           //Toast.makeText(getContext(),"正しく読み込めませんでした",Toast.LENGTH_LONG).show();
         }
         this.webView = ((MainActivity)getContext()).findViewById(R.id.webView1);
         this.scheduleSetter = new ScheduleSetter(this.model,this.webView);
@@ -192,16 +193,16 @@ public class CreateEventFragment extends Fragment {
         }catch (IOException anException){
             anException.printStackTrace();
             Toast.makeText(this.getContext(),"正しく書き込めませんでした",Toast.LENGTH_LONG).show();
-            this.failedCalendarUpdate();
+            this.failedCalendarUpdate("課題の保存に失敗しました");
         }
     }
 
     /**
      * スケジュールの更新に失敗した場合の処理
      */
-    public void failedCalendarUpdate(){
+    public void failedCalendarUpdate(String message){
         this.progressDialog.dismiss();
-        Toast.makeText(this.getContext(), "作成に失敗しました。", Toast.LENGTH_LONG).show();
+        Toast.makeText(this.getContext(), message, Toast.LENGTH_LONG).show();
         return;
     }
 

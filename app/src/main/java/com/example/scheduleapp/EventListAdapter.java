@@ -14,10 +14,13 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 課題一覧のためのアダプタ
+ */
 public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.ViewHolder> {
 
     private List<Subject> eventList;
-    private Model model;
+    private MainModel model;
     private Activity activity;
 
     // Provide a reference to the views for each data item
@@ -41,9 +44,9 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
     }
 
     // Provide a suitable constructor (depends on the kind of subjectList)
-    EventListAdapter(Model model,Activity activity) {
+    EventListAdapter(MainModel model,Activity activity) {
         this.model = model;
-        this.eventList = new ArrayList<Subject>();
+        this.eventList = new ArrayList<>();
         this.activity = activity;
     }
 
@@ -177,7 +180,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.View
      */
     public void modelDataUpdate(){
         this.eventList.clear();
-        this.eventList.addAll(this.model.getScheduleList());
+        this.eventList.addAll(this.model.getSortedScheduleList());
         this.notifyDataSetChanged();
     }
 

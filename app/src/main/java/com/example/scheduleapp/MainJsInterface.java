@@ -46,7 +46,7 @@ public class MainJsInterface extends Object{
     public void error(String aString){
         System.out.println(aString);
         if(this.errorCount>5){
-            this.model.notifyFailedCalendarUpdate();
+            this.model.notifyFailedCalendarUpdate("正しくアクセス出来ませんでした");
             this.errorCount = 0;
         }
         else if(aString.equals("アクセス不能")){

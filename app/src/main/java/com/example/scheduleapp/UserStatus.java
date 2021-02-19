@@ -2,6 +2,7 @@ package com.example.scheduleapp;
 
 import com.google.gson.Gson;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.GeneralSecurityException;
@@ -19,11 +20,15 @@ public class UserStatus extends Object implements Serializable {
     private SecretKey key = null; //秘密鍵
     private SpinnerItem beforeSpinnerItem ; //過去時間のスピナのアイテム
     private SpinnerItem afterSpinnerItem; //未来時間のスピナのアイテム
+    private Boolean isAscendingOrder; //ソート方法 trueなら昇順
+    private Boolean isBeforeSubjectVisible; //過去のイベントを表示するか
 
 
     public UserStatus(){
         this.beforeSpinnerItem = SpinnerItem.NOW;
         this.afterSpinnerItem = SpinnerItem.SIX_MONTH_AFTER;
+        this.isAscendingOrder = true;
+        this.isBeforeSubjectVisible = false;
     }
     /**
      * ユーザ情報をを読み込む
@@ -37,6 +42,8 @@ public class UserStatus extends Object implements Serializable {
             this.authKey = FileUtility.readFileByAES("auth_key", this.key);
             this.beforeSpinnerItem = gson.fromJson(FileUtility.readFileByAES("before_period",this.key),SpinnerItem.class);
             this.afterSpinnerItem = gson.fromJson(FileUtility.readFileByAES("after_period",this.key),SpinnerItem.class);
+            this.isAscendingOrder = gson.fromJson(FileUtility.readFileByAES("is_ascending",this.key),Boolean.class);
+            this.isBeforeSubjectVisible = gson.fromJson(FileUtility.readFileByAES("is_before_subject",this.key),Boolean.class);
         }
         catch (IllegalArgumentException anException){
             anException.printStackTrace();
@@ -62,6 +69,8 @@ public class UserStatus extends Object implements Serializable {
             FileUtility.writeFileByAES("auth_key",this.authKey,this.key);
             FileUtility.writeFileByAES("before_period",gson.toJson(this.beforeSpinnerItem),this.key);
             FileUtility.writeFileByAES("after_period",gson.toJson(this.afterSpinnerItem),this.key);
+            FileUtility.writeFileByAES("is_ascending",gson.toJson(this.isAscendingOrder),this.key);
+            FileUtility.writeFileByAES("is_before_subject",gson.toJson(this.isBeforeSubjectVisible),this.key);
             FileUtility.writeFile("key",KeyUtility.keyToString(this.key));
 
         }catch (GeneralSecurityException anException){
@@ -151,6 +160,37 @@ public class UserStatus extends Object implements Serializable {
      */
     public SpinnerItem getAfterSpinnerItem(){
         return this.afterSpinnerItem;
+    }
+
+    /**
+     * 昇順かどうか
+     * @return 昇順ならtrue
+     */
+    public Boolean isAscendingOrder(){return this.isAscendingOrder;}
+
+    /**
+     * 昇順、降順をセットする trueなら昇順
+     * @param aBoolean 昇順かどうか
+     * @return
+     */
+    public void setIsAscendingOrder(Boolean aBoolean){
+        this.isAscendingOrder = aBoolean;
+    }
+
+    /**
+     * 過去の課題を表示するかどうか
+     * @return 表示するならtrue
+     */
+    public Boolean isBeforeSubjectVisible() {
+        return isBeforeSubjectVisible;
+    }
+
+    /**
+     * 過去の課題を表示するかどうかをセットする
+     * @param beforeSubjectVisible 表示するならtrue
+     */
+    public void setBeforeSubjectVisible(Boolean beforeSubjectVisible) {
+        isBeforeSubjectVisible = beforeSubjectVisible;
     }
 
     /**

@@ -61,11 +61,12 @@ public class ScheduleDeleter {
                 System.out.println("ログインエラー");
                 accessErrorCount = 0;
                 this.loginErrorCount = 0;
+                model.notifyFailedDeleteEvent("ログインできませんでした");
                 return;
             }
             //Moodleなら
             if (url.matches("https://cclms.kyoto-su.ac.jp/")) {
-                System.out.println("get schedule");
+                System.out.println("delete schedule");
                 executeDeleteCEvent();
             }
             //ログインページなら
@@ -109,7 +110,7 @@ public class ScheduleDeleter {
                 System.out.println("アクセスエラー");
                 accessErrorCount = 0;
                 this.loginErrorCount = 0;
-                model.notifyFailedDeleteEvent();
+                model.notifyFailedDeleteEvent("Moodleにアクセス出来ませんでした");
             }
             else if(request.isForMainFrame()) {
                 failedToAccess();

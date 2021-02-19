@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -56,18 +57,17 @@ public class MainActivity extends AppCompatActivity {
                  System.out.println(item);
                  drawer.closeDrawers();
                  FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                 getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                  switch(item.getItemId()){
                      case R.id.event_list_item:
                          if(!(getSupportFragmentManager().findFragmentById(R.id.container) instanceof MainFragment)){
-
+                             getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                              transaction.replace(R.id.container,new MainFragment());
                              transaction.commit();
                          }
                          break;
                      case R.id.add_event_item:
                          if(!(getSupportFragmentManager().findFragmentById(R.id.container) instanceof CreateEventFragment)) {
-
+                             getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                              transaction.replace(R.id.container, new CreateEventFragment());
                              transaction.addToBackStack(null);
                              transaction.commit();
@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
                          break;
                      case R.id.setting_item:
                          if(!(getSupportFragmentManager().findFragmentById(R.id.container) instanceof SettingFragment)) {
-
+                             getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                              transaction.replace(R.id.container, new SettingFragment());
                              transaction.addToBackStack(null);
                              transaction.commit();
@@ -109,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         MenuItem item = menu.findItem(R.id.action_garbage);
+        item.getIcon().setTint(ContextCompat.getColor(this,R.color.garbageButton));
         item.setVisible(false);
         this.menu = menu;
         return true;
