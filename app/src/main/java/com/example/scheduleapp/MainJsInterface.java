@@ -2,26 +2,29 @@ package com.example.scheduleapp;
 
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.app.Activity;
+import android.os.Handler;
 import android.webkit.JavascriptInterface;
 
 /**
  * Javascriptから呼ぶJavaのメソッドを定義するクラス
  */
-public class JsInterface extends Object{
-    protected Model model;
-    private AppCompatActivity  activity;
+public class MainJsInterface extends Object{
+    protected MainModel model;
     private ScheduleGetter scheduleGetter;
     private volatile Integer errorCount = 0;
+    private Handler handler;
 
     /**
      * このクラスのコンストラクタ
-      * @param activity
+      * @param handler
      * @param aModel
      */
-    JsInterface(AppCompatActivity activity,Model aModel,ScheduleGetter scheduleGetter){
-        this.activity = activity;
+    MainJsInterface(Handler handler, MainModel aModel, ScheduleGetter scheduleGetter){
         this.model = aModel;
         this.scheduleGetter = scheduleGetter;
+        this.handler = handler;
     }
 
     /**
@@ -51,7 +54,7 @@ public class JsInterface extends Object{
             synchronized (this){
                 this.errorCount +=1;
             }
-            this.model.getHandler().post(new Runnable() {
+            this.handler.post(new Runnable() {
                 @Override
                 public void run() {
                     scheduleGetter.failedToAccess();

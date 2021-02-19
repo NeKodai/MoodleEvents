@@ -1,6 +1,5 @@
 package com.example.scheduleapp;
 
-
 import android.webkit.CookieManager;
 import android.webkit.ValueCallback;
 import android.webkit.WebResourceError;
@@ -10,28 +9,28 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.LinkedHashMap;
 
 /**
- * Moodleへのログインおよび課題取得を実行するクラス
+ * イベント追加を管理するクラス
  */
-public class ScheduleGetter extends Object{
-    private MainModel model; // モデル
+public class ScheduleSetter {
+
+    private CreateFragmentModel model;
     private WebView hiddenView; //WebView
     private UserStatus user; //ユーザを管理するクラス
     private CookieManager cookieManager; // Cookie管理クラス
     private Integer accessErrorCount = 0; // アクセス不能回数をカウントする変数
+    private Subject createSubject;
 
-    /**
-     * このクラスのコンストラクタ
-     * @param model モデル
-     * @param aView WebView
-     */
-    public ScheduleGetter(MainModel model,WebView aView){
+    public ScheduleSetter(CreateFragmentModel model,WebView aWebView) {
+        this.hiddenView = aWebView;
         this.model = model;
-        this.hiddenView = aView;
         this.hiddenView.getSettings().setJavaScriptEnabled(true);//javascriptオン
         this.hiddenView.getSettings().setDomStorageEnabled(true); // WebStorageをオン
         this.hiddenView.getSettings().setAllowUniversalAccessFromFileURLs(true);
@@ -39,7 +38,7 @@ public class ScheduleGetter extends Object{
         this.hiddenView.clearCache(true);
         this.cookieManager= CookieManager.getInstance();
         this.cookieManager.setAcceptCookie(true);
-        //this.cookieManager.removeAllCookies(null);
+//        this.cookieManager.removeAllCookies(null);
         this.cookieManager.setAcceptThirdPartyCookies(this.hiddenView, true);
         this.cookieManager.flush();
         this.hiddenView.setWebViewClient(new moodleWebViewClient());
@@ -50,44 +49,44 @@ public class ScheduleGetter extends Object{
     /**
      * moodleログインのためのWebViewClient
      */
-    private class moodleWebViewClient extends WebViewClient{
+    private class moodleWebViewClient extends WebViewClient {
         private Integer loginErrorCount = 0; //ログインエラーの回数をカウントする変数
 
         /**
-         *ページ読み込み完了後の処理
+         * ページ読み込み完了後の処理
+         *
          * @param view WebView
-         * @param url 読み込んだURL
+         * @param url  読み込んだURL
          */
         @Override
         public void onPageFinished(WebView view, String url) {
-            super.onPageFinished(view,url);
+            super.onPageFinished(view, url);
 
             System.out.println(url);
-            if(this.loginErrorCount>10){
+            if (this.loginErrorCount > 10) {
                 System.out.println("ログインエラー");
                 accessErrorCount = 0;
                 this.loginErrorCount = 0;
-                model.notifyFailedCalendarUpdate();
                 return;
             }
             //Moodleなら
-            if(url.matches("https://cclms.kyoto-su.ac.jp/")){
+            if (url.matches("https://cclms.kyoto-su.ac.jp/")) {
                 System.out.println("get schedule");
-                getCalendarEvents();
+                executeCreateCEvent();
             }
             //ログインページなら
             else if (url.matches("https://gakunin.kyoto-su.ac.jp/idp/profile/SAML2/Redirect/SSO.execution=.*")) {
-                this.loginErrorCount+=1;
+                this.loginErrorCount += 1;
                 view.evaluateJavascript("document.getElementById('username')", new ValueCallback<String>() {
                     @Override
                     public void onReceiveValue(String value) {
                         user.readUserStatus();
-                        if(!value.equals("null")){ //1段階目の認証
+                        if (!value.equals("null")) { //1段階目の認証
                             System.out.println("first");
-                            view.evaluateJavascript("document.getElementById('username').value='"+user.getUserId()+"'", null);
-                            view.evaluateJavascript("document.getElementById('password').value='"+user.getPassword()+"'", null);
+                            view.evaluateJavascript("document.getElementById('username').value='" + user.getUserId() + "'", null);
+                            view.evaluateJavascript("document.getElementById('password').value='" + user.getPassword() + "'", null);
                             view.evaluateJavascript("var elements=document.getElementsByClassName('form-element form-button')\nelements[0].click()", null);
-                        }else { //2段階目の認証
+                        } else { //2段階目の認証
                             System.out.println("second");
                             try {
                                 String script = String.format("document.getElementById('token').value='%s'", AuthPassWord.getAuthPass(user.getAuthKey()));
@@ -99,30 +98,43 @@ public class ScheduleGetter extends Object{
                         }
                     }
                 });
-            }else if(url.matches("https://cclms.kyoto-su.ac.jp/login/index.php?")){
+            } else if (url.matches("https://cclms.kyoto-su.ac.jp/login/index.php?")) {
                 gakuninButtonClick();
             }
         }
 
-        /**
-         * 読み込みエラーの場合の処理
-         * @param view WebView
-         * @param request リクエスト
-         * @param error エラー
-         */
-        @Override
-        public void onReceivedError(WebView view, WebResourceRequest request , WebResourceError error) {
-            if(accessErrorCount>10){
-                System.out.println("アクセスエラー");
-                accessErrorCount = 0;
-                this.loginErrorCount = 0;
-                model.notifyFailedCalendarUpdate();
-            }
-            else if(request.isForMainFrame()) {
-                failedToAccess();
-            }
-            return;
+    /**
+     * 読み込みエラーの場合の処理
+     * @param view WebView
+     * @param request リクエスト
+     * @param error エラー
+     */
+    @Override
+    public void onReceivedError(WebView view, WebResourceRequest request , WebResourceError error) {
+        if(accessErrorCount>10){
+            System.out.println("アクセスエラー");
+            accessErrorCount = 0;
+            this.loginErrorCount = 0;
+            model.notifyFailedCalendarUpdate();
         }
+        else if(request.isForMainFrame()) {
+            failedToAccess();
+        }
+        return;
+    }
+}
+
+    /**
+     * 作成に成功した時の処理
+     */
+    public void successCreate(String jsonString){
+        System.out.println(jsonString);
+        ArrayList<LinkedTreeMap> data = new Gson().fromJson(jsonString,ArrayList.class);
+        LinkedTreeMap<String,LinkedTreeMap> event = (LinkedTreeMap<String,LinkedTreeMap>) data.get(0).get("data");
+        Integer id =((Double)event.get("event").get("id")).intValue();
+        this.createSubject.setId(id);
+        this.model.addSubject(this.createSubject);
+        this.model.notifySuccessCreate();
     }
 
     /**
@@ -142,43 +154,25 @@ public class ScheduleGetter extends Object{
         this.hiddenView.loadUrl("https://cclms.kyoto-su.ac.jp/auth/shibboleth/");
     }
 
-    /**
-     * カレンダーからイベントIDを取得し、イベントの詳細を取得するJavascriptを実行する
-     */
-    private void getCalendarEvents(){
-        try {
-            String script = FileUtility.readAssets("getEvents.js");
-            String args = this.makeJsArgumentString();
-            script+="(function () { wait("+args+"); })();";
-            this.hiddenView.evaluateJavascript(script, null);
-        }
-        catch (IOException anException){
-            anException.printStackTrace();
-            System.out.println("js読み込み失敗");
-        }
-        return;
+    public void createCalendarEvent(Subject aSubject){
+        this.createSubject = aSubject;
+        this.loadMoodle();
     }
 
     /**
-     * getCalendarEventsで使用するJavaScriptの引数の文字列を作成する
-     * @return 引数の文字列
+     * カレンダーイベントを作成するJSを実行する
      */
-    private String makeJsArgumentString(){
-        SpinnerItem before = this.user.getBeforeSpinnerItem();
-        SpinnerItem after = this.user.getAfterSpinnerItem();
-        Calendar beforeCalendar = Calendar.getInstance();
-        Calendar afterCalendar = Calendar.getInstance();
-        StringBuilder stringBuilder = new StringBuilder();
-        beforeCalendar.add(before.getCalendarField(),before.getAmount());
-        afterCalendar.add(after.getCalendarField(),after.getAmount());
-        stringBuilder.append(beforeCalendar.get(Calendar.YEAR));
-        stringBuilder.append(",");
-        stringBuilder.append(beforeCalendar.get(Calendar.MONTH)+1);
-        stringBuilder.append(",");
-        stringBuilder.append(afterCalendar.get(Calendar.YEAR));
-        stringBuilder.append(",");
-        stringBuilder.append(afterCalendar.get(Calendar.MONTH)+1);
-        return new String(stringBuilder);
+    private void executeCreateCEvent(){
+        try {
+            Subject aSubject = this.createSubject.clone();
+            aSubject.setDescription(this.createSubject.getDescription().replace(System.getProperty("line.separator"),"%3C%2Fp%3E%0D%0A%3Cp%3E"));
+            String args = new Gson().toJson(aSubject);
+            String script = FileUtility.readAssets("createCalendarEvent.js");
+            script+="(function () { wait("+args+"); })();";
+            this.hiddenView.evaluateJavascript(script, null);
+        }catch (IOException anException){
+            anException.printStackTrace();
+        }
     }
 
     /**

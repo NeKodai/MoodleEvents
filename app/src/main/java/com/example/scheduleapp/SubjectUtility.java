@@ -159,5 +159,9 @@ public class SubjectUtility extends Object{
         }
         return idSet;
     }
+
+    public static void main(String... args){
+
+    }
 }
 

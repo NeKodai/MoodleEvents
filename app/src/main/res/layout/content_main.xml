@@ -7,7 +7,7 @@
     android:background="@drawable/divider_item"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".MainActivity"
-    tools:showIn="@layout/activity_main">
+>
 
     <LinearLayout
         android:id="@+id/activityMain1"
@@ -15,6 +15,7 @@
         android:layout_height="match_parent"
         android:background="#FFFFFF"
         android:orientation="vertical"
+        android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -33,7 +34,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="5dp"
                 android:layout_marginVertical="5dp"
-                android:layout_weight="5"
+                android:layout_weight="4"
                 android:text="@string/title_menu_view"
                 android:textAlignment="center" />
 
@@ -44,7 +45,7 @@
                 android:layout_marginHorizontal="5dp"
                 android:layout_marginVertical="5dp"
                 android:layout_weight="0"
-                android:paddingLeft="10dp"
+                android:paddingEnd="5dp"
                 android:text="提出"
                 android:textAlignment="center" />
 
@@ -74,7 +75,6 @@
                     android:id="@+id/no_schedule_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/no_schedule_text"
                     android:textAlignment="center"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -97,19 +97,5 @@
         </FrameLayout>
 
     </LinearLayout>
-
-    <WebView
-        android:id="@+id/webView1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:alpha="0.5"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="visible">
-
-    </WebView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

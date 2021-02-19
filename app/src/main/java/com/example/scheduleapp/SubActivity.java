@@ -61,16 +61,16 @@ public class SubActivity extends AppCompatActivity {
 
         //開始時刻と終了時刻のテキストを設定
         if(aSubject.getStartTime()!=null){
-            String startTimeText = "開始時刻　" + DayUtility.createDateString(aSubject.getStartTime());
+            String startTimeText = "開始時刻　" + DayUtility.createFullDateString(aSubject.getStartTime());
             startTime.setText(startTimeText);
-            String endTimeText = "終了時刻　" + DayUtility.createDateString(aSubject.getEndTime());
+            String endTimeText = "終了時刻　" + DayUtility.createFullDateString(aSubject.getEndTime());
             endTime.setText(endTimeText);
         }else{
             //開始時刻が定義されていないのでTextViewを消す
             startTime.setVisibility(View.GONE);
             //userイベントなら開始時刻、その他なら提出期限とする
             String aString = (aSubject.getCategoryName().equals("user")) ? "開始時刻　" :"提出期限　";
-            String endTimeText = aString + DayUtility.createDateString(aSubject.getEndTime());
+            String endTimeText = aString + DayUtility.createFullDateString(aSubject.getEndTime());
             endTime.setText(endTimeText);
         }
         startOrEnd.setText((this.aSubject.isAlreadyStarted()) ? "終了まで　" : "開始まで　");

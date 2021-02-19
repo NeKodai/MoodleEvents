@@ -37,15 +37,35 @@ public class DayUtility extends Object{
     }
 
     /**
+     * カレンダーから日付と時間の文字列を作成
+     * @param aCalendar
+     * @return 日付と時間の文字列
+     */
+    public static String createFullDateString(Calendar aCalendar){
+        return  String.format(Locale.JAPAN,"%d年%d月%d日 %d時%d分",
+                aCalendar.get(Calendar.YEAR),aCalendar.get(Calendar.MONTH)+1,aCalendar.get(Calendar.DATE),
+                aCalendar.get(Calendar.HOUR_OF_DAY),aCalendar.get(Calendar.MINUTE));
+    }
+
+    /**
      * カレンダーから日付の文字列を作成
      * @param aCalendar
      * @return 日付の文字列
      */
     public static String createDateString(Calendar aCalendar){
-        return  String.format(Locale.US,"%d年%d月%d日 %d時%d分",
-                aCalendar.get(Calendar.YEAR),aCalendar.get(Calendar.MONTH)+1,aCalendar.get(Calendar.DATE),
-                aCalendar.get(Calendar.HOUR_OF_DAY),aCalendar.get(Calendar.MINUTE));
+        return String.format(Locale.JAPAN,"%d年%d月%d日",aCalendar.get(Calendar.YEAR),aCalendar.get(Calendar.MONTH)+1,aCalendar.get(Calendar.DAY_OF_MONTH));
     }
+
+    /**
+     * カレンダーから時間の文字列を作成
+     * @param aCalendar
+     * @return 時間の文字列
+     */
+    public static String createTimeString(Calendar aCalendar){
+        return String.format(Locale.JAPAN,"%d時%d分",aCalendar.get(Calendar.HOUR_OF_DAY),aCalendar.get(Calendar.MINUTE));
+    }
+
+
 
     /**
      * テスト用メインメソッド

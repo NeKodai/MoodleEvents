@@ -2,40 +2,31 @@ package com.example.scheduleapp;
 
 import android.os.Bundle;
 
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
-import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.google.android.material.navigation.NavigationView;
+
 import java.io.File;
-import java.io.IOException;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * メインスレッド
  */
 public class MainActivity extends AppCompatActivity {
 
-    private EventListAdapter rAdapter;
-    private ScheduleGetter aScheduleGetter;
-    private Controller controller;
-    private Model model;
-    private RecyclerView recyclerView;
-    private SwipeRefreshLayout swipeRefreshLayout;
-    private TextView noScheduleText;
-    private Timer timer;
-    private Handler handler;
+    private WebView webView;
+    private Menu menu;
 
     /**
      * ビューの初期設定
@@ -44,122 +35,57 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //レイアウトの読み込み開始
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
-        WebView aWebView = (WebView) findViewById(R.id.webView1);
-        this.recyclerView = findViewById(R.id.recyclerView1);
-        this.noScheduleText  =findViewById(R.id.no_schedule_text);
-        //レイアウト読み込みここまで
         setSupportActionBar(toolbar);
-        //ファイルユーティリティ初期化
-        FileUtility.initialize(getApplicationContext());
+        MainFragment fragment = new MainFragment();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.add(R.id.container,fragment);
+        transaction.commit();
+        this.webView = findViewById(R.id.webView1);
 
-        this.handler = new Handler();
-        this.model = new Model(this,new Handler());
-        this.aScheduleGetter = new ScheduleGetter(this.model,aWebView);
-        aWebView.addJavascriptInterface(new JsInterface(this,this.model,this.aScheduleGetter),"Android");
-        this.controller = new Controller();
-        this.controller.initialize(this,aScheduleGetter);
+        //Drawerの設定
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this,drawer,toolbar,R.string.drawer_open,R.string.drawer_close);
+        drawer.addDrawerListener(actionBarDrawerToggle);
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener()
+        {
+             @Override
+             public boolean onNavigationItemSelected(MenuItem item) {
+                 System.out.println(item);
+                 drawer.closeDrawers();
+                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                 getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                 switch(item.getItemId()){
+                     case R.id.event_list_item:
+                         if(!(getSupportFragmentManager().findFragmentById(R.id.container) instanceof MainFragment)){
 
-        //RecyclerViewの設定
-        this.recyclerView.setHasFixedSize(true);
-        RecyclerView.LayoutManager rLayoutManager = new LinearLayoutManager(this);
-        this.recyclerView.setLayoutManager(rLayoutManager);
-        this.rAdapter = new EventListAdapter(this.model,this){
-            @Override
-            protected void onItemClick(View view, Integer position, Subject aSubject){
-                controller.setSubActivity(aSubject);
-            }
-        };
-        this.recyclerView.setAdapter(this.rAdapter);
+                             transaction.replace(R.id.container,new MainFragment());
+                             transaction.commit();
+                         }
+                         break;
+                     case R.id.add_event_item:
+                         if(!(getSupportFragmentManager().findFragmentById(R.id.container) instanceof CreateEventFragment)) {
 
-        //スワイプリフレッシュリスナの更新
-        this.swipeRefreshLayout= (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
-        this.swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_light);
-        this.swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                controller.updateSchedule();
-            }
-        });
+                             transaction.replace(R.id.container, new CreateEventFragment());
+                             transaction.addToBackStack(null);
+                             transaction.commit();
+                         }
+                         break;
+                     case R.id.setting_item:
+                         if(!(getSupportFragmentManager().findFragmentById(R.id.container) instanceof SettingFragment)) {
 
-        //予定表を読み込む
-        try {
-            this.model.readSchedule(FileUtility.readFile("schedule.json"));
-            this.rAdapter.modelDataUpdate();
-        }catch (IOException anException){
-            Toast.makeText(this,"正しく読み込めませんでした",Toast.LENGTH_LONG).show();
-        }
-        return;
-    }
-
-    /**
-     * ビューの依存物に対して更新通知をする
-     */
-    public void update(){
-        this.handler.post(new Runnable() {
-            @Override
-            public void run() {
-                rAdapter.modelDataUpdate();
-                if(model.getScheduleList().isEmpty()){
-                    noScheduleText.setText("課題がありません。\n下にスワイプして更新してください。");
-                }
-                else{
-                    noScheduleText.setText("");
-                }
-            }
-        });
-        return;
-    }
-
-    /**
-     * シケジュールの更新が終了したことを通知
-     */
-    public void notifyFinCalendarUpdate() {
-        this.swipeRefreshLayout.setRefreshing(false);
-        //スケジュールの内容を保存する
-        try {
-            FileUtility.writeFile("schedule.json", this.model.getJsonSchedule());
-            Toast.makeText(this, "更新しました。", Toast.LENGTH_SHORT).show();
-        }catch (IOException anException){
-            anException.printStackTrace();
-            Toast.makeText(this,"正しく書き込めませんでした",Toast.LENGTH_LONG).show();
-            this.failedCalendarUpdate();
-        }
-        return;
-    }
-
-    /**
-     * スケジュールの更新に失敗した場合の処理
-     */
-    public void failedCalendarUpdate(){
-        this.swipeRefreshLayout.setRefreshing(false);
-        Toast.makeText(this, "更新に失敗しました。", Toast.LENGTH_LONG).show();
-        return;
-    }
-
-    /**
-     * このアクティビティの読み込みが完了したときの処理
-     */
-    @Override
-    protected void onStart(){
-        super.onStart();
-        //1秒毎にデータを更新
-        this.timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        rAdapter.notifyDataSetChanged();
-                    }
-                });
-            }
-        },0,1000);
-        return;
-
+                             transaction.replace(R.id.container, new SettingFragment());
+                             transaction.addToBackStack(null);
+                             transaction.commit();
+                         }
+                         break;
+                 }
+                 return false;
+             }
+         });
+        actionBarDrawerToggle.syncState();
     }
 
     /**
@@ -167,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
      */
     @Override
     protected void onPause(){
-        this.timer.cancel();
+        //this.timer.cancel();
         super.onPause();
         System.out.println("中断しました");
         return;
@@ -182,9 +108,17 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        MenuItem item = menu.findItem(R.id.action_garbage);
+        item.setVisible(false);
+        this.menu = menu;
         return true;
     }
 
+    /**
+     * アクションバーのアイテムが選択された時の処理
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -193,17 +127,30 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            this.controller.setSettingActivity();
+        if (id == R.id.action_about) {
             return true;
         }
-        else if(id == R.id.action_reset){
-            File aFile = new File(getFilesDir(),"schedule.json");
-            if(aFile.exists()){
-                aFile.delete();
-                Toast.makeText(this, "リセットしました", Toast.LENGTH_SHORT).show();
+        else if(id == R.id.action_garbage){
+            if(getSupportFragmentManager().findFragmentById(R.id.container) instanceof SubjectFragment){
+                SubjectFragment fragment = (SubjectFragment)getSupportFragmentManager().findFragmentById(R.id.container);
+                if(fragment!=null) fragment.pushGarbageButton();
             }
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
+
+    /**
+     * WebViewを応答する
+     * @return WebView
+     */
+    public WebView getWebView(){
+        return this.webView;
+    }
+
+    /**
+     * Menuを応答する
+     * @return Menu
+     */
+    public Menu getMenu(){return this.menu;}
 }
