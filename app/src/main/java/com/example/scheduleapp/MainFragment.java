@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -120,7 +119,7 @@ public class MainFragment extends Fragment {
         this.upperMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               sortDialog.show();
+               if(!isUpdating) sortDialog.show();
             }
         });
 
@@ -158,7 +157,7 @@ public class MainFragment extends Fragment {
      * シケジュールの更新が終了したことを通知
      */
     public void notifyFinCalendarUpdate() {
-        isUpdating = false;
+        this.isUpdating = false;
         ((MainActivity)getContext()).setDrawerLock(DrawerLayout.LOCK_MODE_UNLOCKED);
         this.swipeRefreshLayout.setRefreshing(false);
         //スケジュールの内容を保存する
@@ -176,7 +175,7 @@ public class MainFragment extends Fragment {
      * スケジュールの更新に失敗した場合の処理
      */
     public void failedCalendarUpdate(String message){
-        isUpdating = false;
+        this.isUpdating = false;
         ((MainActivity)getContext()).setDrawerLock(DrawerLayout.LOCK_MODE_UNLOCKED);
         this.swipeRefreshLayout.setRefreshing(false);
         Toast.makeText(this.getContext(), message, Toast.LENGTH_LONG).show();
@@ -188,10 +187,10 @@ public class MainFragment extends Fragment {
      */
     private void selectEventSortDialog(){
         LayoutInflater layoutInflater = requireActivity().getLayoutInflater();
-        View view = layoutInflater.inflate(R.layout.sort_menu,null);
-        RadioGroup radioGroup =  view.findViewById(R.id.sort_radio_group);
+        View view = layoutInflater.inflate(R.layout.sort_menu, null);
+        RadioGroup radioGroup = view.findViewById(R.id.sort_radio_group);
         CheckBox checkBox = view.findViewById(R.id.is_before_subject);
-        radioGroup.check((this.user.isAscendingOrder())? R.id.ascending:R.id.descending);
+        radioGroup.check((this.user.isAscendingOrder()) ? R.id.ascending : R.id.descending);
         checkBox.setChecked(this.user.isBeforeSubjectVisible());
         this.sortDialog = new AlertDialog.Builder(getContext())
                 .setTitle("ソート方法")

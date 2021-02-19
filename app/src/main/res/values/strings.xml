@@ -17,6 +17,8 @@
     <string name="deadline_menu_view">開始/終了</string>
     <string name="drawer_open">ドロワーを開く</string>
     <string name="drawer_close">ドロワーを閉じる</string>
-    <string name="license"><u>ライセンス</u></string>
+    <string name="license"><u>オープンソースライセンス</u></string>
+    <string name="twitter">https://twitter.com/NekoZ_meow</string>
+    <string name="producer">© 2021 NekoZ</string>
 
 </resources>
