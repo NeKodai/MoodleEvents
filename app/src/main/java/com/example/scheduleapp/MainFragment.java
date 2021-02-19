@@ -15,6 +15,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -32,7 +33,6 @@ public class MainFragment extends Fragment {
 
     private EventListAdapter rAdapter;
     private ScheduleGetter aScheduleGetter;
-    private Controller controller;
     private MainModel model;
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -42,6 +42,7 @@ public class MainFragment extends Fragment {
     private LinearLayout upperMenu;
     private AlertDialog sortDialog;
     private UserStatus user;
+    private Boolean isUpdating = false;
 
     /**
      * Fragmentで表示するViewを作成するメソッド
@@ -78,8 +79,6 @@ public class MainFragment extends Fragment {
         this.model = new MainModel(this,this.user);
         this.aScheduleGetter = new ScheduleGetter(this.model,aWebView);
         aWebView.addJavascriptInterface(new MainJsInterface(this.handler,this.model,this.aScheduleGetter),"Android");
-        this.controller = new Controller();
-        this.controller.initialize(this,aScheduleGetter);
 
         //RecyclerViewの設定
         this.recyclerView.setHasFixedSize(true);
@@ -88,14 +87,19 @@ public class MainFragment extends Fragment {
         this.rAdapter = new EventListAdapter(this.model,this.getActivity()){
             @Override
             protected void onItemClick(View view, Integer position, Subject aSubject){
-                SubjectFragment subjectFragment = new SubjectFragment();
-                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                Bundle args = new Bundle();
-                args.putSerializable("subject",aSubject);
-                subjectFragment.setArguments(args);
-                transaction.replace(R.id.container,subjectFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
+                if(!isUpdating) {
+                    SubjectFragment subjectFragment = new SubjectFragment();
+                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                    Bundle args = new Bundle();
+                    args.putSerializable("subject", aSubject);
+                    subjectFragment.setArguments(args);
+                    transaction.replace(R.id.container, subjectFragment);
+                    transaction.addToBackStack(null);
+                    transaction.commit();
+                }
+                else{
+                    Toast.makeText(getContext(),"更新中です。しばらくお待ちください",Toast.LENGTH_SHORT).show();
+                }
             }
         };
         this.recyclerView.setAdapter(this.rAdapter);
@@ -107,7 +111,9 @@ public class MainFragment extends Fragment {
         this.swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                controller.updateSchedule();
+                isUpdating = true;
+                ((MainActivity)getContext()).setDrawerLock(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                aScheduleGetter.loadMoodle();
             }
         });
 
@@ -152,6 +158,8 @@ public class MainFragment extends Fragment {
      * シケジュールの更新が終了したことを通知
      */
     public void notifyFinCalendarUpdate() {
+        isUpdating = false;
+        ((MainActivity)getContext()).setDrawerLock(DrawerLayout.LOCK_MODE_UNLOCKED);
         this.swipeRefreshLayout.setRefreshing(false);
         //スケジュールの内容を保存する
         try {
@@ -168,6 +176,8 @@ public class MainFragment extends Fragment {
      * スケジュールの更新に失敗した場合の処理
      */
     public void failedCalendarUpdate(String message){
+        isUpdating = false;
+        ((MainActivity)getContext()).setDrawerLock(DrawerLayout.LOCK_MODE_UNLOCKED);
         this.swipeRefreshLayout.setRefreshing(false);
         Toast.makeText(this.getContext(), message, Toast.LENGTH_LONG).show();
         return;

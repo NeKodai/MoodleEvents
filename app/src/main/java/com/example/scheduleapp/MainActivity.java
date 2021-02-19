@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
     private WebView webView;
     private Menu menu;
+    private DrawerLayout drawer;
 
     /**
      * ビューの初期設定
@@ -46,10 +47,10 @@ public class MainActivity extends AppCompatActivity {
         this.webView = findViewById(R.id.webView1);
 
         //Drawerの設定
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        this.drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
-        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this,drawer,toolbar,R.string.drawer_open,R.string.drawer_close);
-        drawer.addDrawerListener(actionBarDrawerToggle);
+        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this,this.drawer,toolbar,R.string.drawer_open,R.string.drawer_close);
+        this.drawer.addDrawerListener(actionBarDrawerToggle);
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener()
         {
              @Override
@@ -86,6 +87,14 @@ public class MainActivity extends AppCompatActivity {
              }
          });
         actionBarDrawerToggle.syncState();
+    }
+
+    /**
+     * ドロワーのロックを設定する
+     * @param lockMode  ロックモード
+     */
+    public void setDrawerLock(Integer lockMode){
+        this.drawer.setDrawerLockMode(lockMode);
     }
 
     /**
@@ -129,7 +138,10 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_about) {
-            return true;
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.container, new AboutAppFragment());
+            transaction.addToBackStack(null);
+            transaction.commit();
         }
         else if(id == R.id.action_garbage){
             if(getSupportFragmentManager().findFragmentById(R.id.container) instanceof SubjectFragment){

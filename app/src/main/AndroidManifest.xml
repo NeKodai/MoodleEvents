@@ -11,7 +11,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
-            android:label="@string/event_list"
+            android:label="@string/app_name"
             android:configChanges="orientation|screenSize"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -19,15 +19,5 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".SubActivity"
-            android:label="@string/subject" >
-        </activity>
-        <activity
-            android:name=".SettingActivity"
-            android:windowSoftInputMode="adjustPan"
-            android:label="@string/action_settings" >
-        </activity>
     </application>
-
 </manifest>

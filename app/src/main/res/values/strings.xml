@@ -1,9 +1,11 @@
 <resources>
     <string name="app_name">Moodle Events</string>
+    <string name="app_version">beta 1.0</string>
     <string name="event_list">課題一覧</string>
     <string name="create_event">課題追加</string>
     <string name="action_settings">設定</string>
     <string name="about_app">このアプリケーションについて</string>
+    <string name="this_app">このアプリケーション</string>
     <string name="action_reset">データリセット</string>
     <string name="subject">課題</string>
     <string name="save">保存</string>
@@ -15,5 +17,6 @@
     <string name="deadline_menu_view">開始/終了</string>
     <string name="drawer_open">ドロワーを開く</string>
     <string name="drawer_close">ドロワーを閉じる</string>
+    <string name="license"><u>ライセンス</u></string>
 
 </resources>

@@ -36,7 +36,6 @@ public class MainModel extends Model{
             List<Subject> subjectList = SubjectUtility.jsonToSubjectList(jsonString);
             scheduleList.clear();
             this.addSchedule(subjectList);
-            this.sortScheduleByCalendar();
             this.mainFragment.notifyFinCalendarUpdate();
             this.notifyUpdate();
         }catch (Exception anException){
@@ -87,7 +86,6 @@ public class MainModel extends Model{
         }else{
             Collections.sort(sortedList,Collections.reverseOrder());
         }
-        System.out.println(sortedList);
         return sortedList;
     }
 

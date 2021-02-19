@@ -95,12 +95,4 @@ public class Model extends Object{
        return this.scheduleList.size();
     }
 
-    /**
-     * このモデルのスケジュールをカレンダーでソートする
-     */
-    public void sortScheduleByCalendar(){
-        Collections.sort(this.scheduleList);
-        return;
-    }
-
 }
