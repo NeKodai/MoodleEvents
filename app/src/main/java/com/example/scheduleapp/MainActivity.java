@@ -11,6 +11,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.webkit.WebView;
 import android.widget.Toast;
 
@@ -25,6 +26,7 @@ import java.io.File;
 public class MainActivity extends AppCompatActivity {
 
     private WebView webView;
+    private Menu menu;
 
     /**
      * ビューの初期設定
@@ -58,19 +60,26 @@ public class MainActivity extends AppCompatActivity {
                  switch(item.getItemId()){
                      case R.id.event_list_item:
                          if(!(getSupportFragmentManager().findFragmentById(R.id.container) instanceof MainFragment)){
+
                              transaction.replace(R.id.container,new MainFragment());
                              transaction.commit();
                          }
                          break;
                      case R.id.add_event_item:
-                         transaction.replace(R.id.container,new CreateEventFragment());
-                         transaction.addToBackStack(null);
-                         transaction.commit();
+                         if(!(getSupportFragmentManager().findFragmentById(R.id.container) instanceof CreateEventFragment)) {
+
+                             transaction.replace(R.id.container, new CreateEventFragment());
+                             transaction.addToBackStack(null);
+                             transaction.commit();
+                         }
                          break;
                      case R.id.setting_item:
-                         transaction.replace(R.id.container,new SettingFragment());
-                         transaction.addToBackStack(null);
-                         transaction.commit();
+                         if(!(getSupportFragmentManager().findFragmentById(R.id.container) instanceof SettingFragment)) {
+
+                             transaction.replace(R.id.container, new SettingFragment());
+                             transaction.addToBackStack(null);
+                             transaction.commit();
+                         }
                          break;
                  }
                  return false;
@@ -99,9 +108,17 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        MenuItem item = menu.findItem(R.id.action_garbage);
+        item.setVisible(false);
+        this.menu = menu;
         return true;
     }
 
+    /**
+     * アクションバーのアイテムが選択された時の処理
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -110,21 +127,30 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            //this.controller.setSettingActivity();
+        if (id == R.id.action_about) {
             return true;
         }
-        else if(id == R.id.action_reset){
-            File aFile = new File(getFilesDir(),"schedule.json");
-            if(aFile.exists()){
-                aFile.delete();
-                Toast.makeText(this, "リセットしました", Toast.LENGTH_SHORT).show();
+        else if(id == R.id.action_garbage){
+            if(getSupportFragmentManager().findFragmentById(R.id.container) instanceof SubjectFragment){
+                SubjectFragment fragment = (SubjectFragment)getSupportFragmentManager().findFragmentById(R.id.container);
+                if(fragment!=null) fragment.pushGarbageButton();
             }
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * WebViewを応答する
+     * @return WebView
+     */
     public WebView getWebView(){
         return this.webView;
     }
+
+    /**
+     * Menuを応答する
+     * @return Menu
+     */
+    public Menu getMenu(){return this.menu;}
 }

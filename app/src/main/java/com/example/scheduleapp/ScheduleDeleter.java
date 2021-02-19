@@ -13,22 +13,17 @@ import com.google.gson.internal.LinkedTreeMap;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.LinkedHashMap;
 
-/**
- * イベント追加を管理するクラス
- */
-public class ScheduleSetter {
+public class ScheduleDeleter {
 
-    private CreateFragmentModel model;
+    private SubjectFragmentModel model;
     private WebView hiddenView; //WebView
     private UserStatus user; //ユーザを管理するクラス
     private CookieManager cookieManager; // Cookie管理クラス
     private Integer accessErrorCount = 0; // アクセス不能回数をカウントする変数
-    private Subject createSubject;
+    private Subject deleteSubject;
 
-    public ScheduleSetter(CreateFragmentModel model,WebView aWebView) {
+    public ScheduleDeleter(SubjectFragmentModel model,WebView aWebView) {
         this.hiddenView = aWebView;
         this.model = model;
         this.hiddenView.getSettings().setJavaScriptEnabled(true);//javascriptオン
@@ -38,7 +33,6 @@ public class ScheduleSetter {
         this.hiddenView.clearCache(true);
         this.cookieManager= CookieManager.getInstance();
         this.cookieManager.setAcceptCookie(true);
-//        this.cookieManager.removeAllCookies(null);
         this.cookieManager.setAcceptThirdPartyCookies(this.hiddenView, true);
         this.cookieManager.flush();
         this.hiddenView.setWebViewClient(new moodleWebViewClient());
@@ -72,7 +66,7 @@ public class ScheduleSetter {
             //Moodleなら
             if (url.matches("https://cclms.kyoto-su.ac.jp/")) {
                 System.out.println("get schedule");
-                executeCreateCEvent();
+                executeDeleteCEvent();
             }
             //ログインページなら
             else if (url.matches("https://gakunin.kyoto-su.ac.jp/idp/profile/SAML2/Redirect/SSO.execution=.*")) {
@@ -103,38 +97,32 @@ public class ScheduleSetter {
             }
         }
 
-    /**
-     * 読み込みエラーの場合の処理
-     * @param view WebView
-     * @param request リクエスト
-     * @param error エラー
-     */
-    @Override
-    public void onReceivedError(WebView view, WebResourceRequest request , WebResourceError error) {
-        if(accessErrorCount>10){
-            System.out.println("アクセスエラー");
-            accessErrorCount = 0;
-            this.loginErrorCount = 0;
-            model.notifyFailedCalendarUpdate();
+        /**
+         * 読み込みエラーの場合の処理
+         * @param view WebView
+         * @param request リクエスト
+         * @param error エラー
+         */
+        @Override
+        public void onReceivedError(WebView view, WebResourceRequest request , WebResourceError error) {
+            if(accessErrorCount>10){
+                System.out.println("アクセスエラー");
+                accessErrorCount = 0;
+                this.loginErrorCount = 0;
+                model.notifyFailedDeleteEvent();
+            }
+            else if(request.isForMainFrame()) {
+                failedToAccess();
+            }
+            return;
         }
-        else if(request.isForMainFrame()) {
-            failedToAccess();
-        }
-        return;
     }
-}
 
     /**
      * 作成に成功した時の処理
      */
-    public void successCreate(String jsonString){
-        System.out.println(jsonString);
-        ArrayList<LinkedTreeMap> data = new Gson().fromJson(jsonString,ArrayList.class);
-        LinkedTreeMap<String,LinkedTreeMap> event = (LinkedTreeMap<String,LinkedTreeMap>) data.get(0).get("data");
-        Integer id =((Double)event.get("event").get("id")).intValue();
-        this.createSubject.setId(id);
-        this.model.addSubject(this.createSubject);
-        this.model.notifySuccessCreate();
+    public void successDelete(){
+        this.model.notifySuccessDelete();
     }
 
     /**
@@ -154,21 +142,19 @@ public class ScheduleSetter {
         this.hiddenView.loadUrl("https://cclms.kyoto-su.ac.jp/auth/shibboleth/");
     }
 
-    public void createCalendarEvent(Subject aSubject){
-        this.createSubject = aSubject;
+    public void deleteCalendarEvent(Subject aSubject){
         this.loadMoodle();
+        this.deleteSubject = aSubject;
     }
 
     /**
      * カレンダーイベントを作成するJSを実行する
      */
-    private void executeCreateCEvent(){
+    private void executeDeleteCEvent(){
         try {
-            Subject aSubject = this.createSubject.clone();
-            aSubject.setDescription(this.createSubject.getDescription().replace(System.getProperty("line.separator"),"%3C%2Fp%3E%0D%0A%3Cp%3E"));
-            String args = new Gson().toJson(aSubject);
-            String script = FileUtility.readAssets("createCalendarEvent.js");
-            script+="(function () { wait("+args+"); })();";
+            Integer id = this.deleteSubject.getId();
+            String script = FileUtility.readAssets("deleteCalendarEvent.js");
+            script+="(function () { wait("+id+"); })();";
             this.hiddenView.evaluateJavascript(script, null);
         }catch (IOException anException){
             anException.printStackTrace();

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/nav_graph"
+    app:startDestination="@id/mainFragment">
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.example.scheduleapp.MainFragment"
+        android:label="MainFragment" >
+        <action
+            android:id="@+id/action_mainFragment_to_settingFragment"
+            app:destination="@id/settingFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_createEventFragment"
+            app:destination="@id/createEventFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/createEventFragment"
+        android:name="com.example.scheduleapp.CreateEventFragment"
+        android:label="CreateEventFragment" />
+    <fragment
+        android:id="@+id/settingFragment"
+        android:name="com.example.scheduleapp.SettingFragment"
+        android:label="SettingFragment" />
+</navigation>

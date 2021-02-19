@@ -75,6 +75,8 @@ public class SettingFragment extends Fragment {
         Button save = (Button)view.findViewById(R.id.save);
         save.setOnClickListener(v -> {this.saveClick();});
 
+        getActivity().setTitle(R.string.action_settings);
+
         return;
     }
 

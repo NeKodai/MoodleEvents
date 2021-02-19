@@ -3,6 +3,7 @@ package com.example.scheduleapp;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -38,6 +39,20 @@ public class Model extends Object{
     public void addSubject(Subject aSubject){
         scheduleList.add(aSubject);
         return;
+    }
+
+    /**
+     * idで指定した課題を削除する
+     * @param id 課題のid
+     */
+    public void deleteSubjectById(Integer id){
+        Iterator<Subject> anIterator = this.scheduleList.iterator();
+        while(anIterator.hasNext()){
+            Subject aSubject = anIterator.next();
+            if(aSubject.getId().equals(id)){
+                anIterator.remove();
+            }
+        }
     }
 
     /**

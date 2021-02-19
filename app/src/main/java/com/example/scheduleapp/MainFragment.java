@@ -17,8 +17,11 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import java.io.IOException;
 import java.util.Timer;
+import java.util.TimerTask;
 
-// Fragmentクラスを継承します
+/**
+ * 課題一覧のフラグメント
+ */
 public class MainFragment extends Fragment {
 
     private EventListAdapter rAdapter;
@@ -31,7 +34,13 @@ public class MainFragment extends Fragment {
     private Timer timer;
     private Handler handler;
 
-    // Fragmentで表示するViewを作成するメソッド
+    /**
+     * Fragmentで表示するViewを作成するメソッド
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return ビュー
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
@@ -39,12 +48,13 @@ public class MainFragment extends Fragment {
         return inflater.inflate(R.layout.content_main, container, false);
     }
 
-    // Viewが生成し終わった時に呼ばれるメソッド
+    /**
+     * Viewが生成し終わった時に呼ばれるメソッド
+     */
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        //レイアウトの読み込み開始
-        //WebView aWebView =  view.findViewById(R.id.webView1);
+        getActivity().setTitle(R.string.event_list);
         WebView aWebView = ((MainActivity)getContext()).getWebView();
         this.recyclerView = view.findViewById(R.id.recyclerView1);
         this.noScheduleText  =view.findViewById(R.id.no_schedule_text);
@@ -149,31 +159,31 @@ public class MainFragment extends Fragment {
     @Override
     public void onStart(){
         super.onStart();
-//        1秒毎にデータを更新
-//        this.timer = new Timer();
-//        timer.scheduleAtFixedRate(new TimerTask() {
-//            @Override
-//            public void run() {
-//                handler.post(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        rAdapter.notifyDataSetChanged();
-//                    }
-//                });
-//            }
-//        },0,1000);
-//        return;
+       // 1秒毎にデータを更新
+        this.timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        rAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+        },0,1000);
+        return;
     }
 
-//    /**
-//     * このアクティビティから画面が離れた時の処理
-//     */
-//    @Override
-//    public void onPause(){
-//        this.timer.cancel();
-//        super.onPause();
-//        System.out.println("中断しました");
-//        return;
-//    }
+    /**
+     * このアクティビティから画面が離れた時の処理
+     */
+    @Override
+    public void onPause(){
+        this.timer.cancel();
+        super.onPause();
+        System.out.println("中断しました");
+        return;
+    }
 
 }

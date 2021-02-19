@@ -1,5 +1,6 @@
 package com.example.scheduleapp;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -38,6 +39,7 @@ public class CreateEventFragment extends Fragment {
     private WebView webView;
     private ScheduleSetter scheduleSetter;
     private CreateFragmentModel model;
+    private ProgressDialog progressDialog;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -63,6 +65,12 @@ public class CreateEventFragment extends Fragment {
         this.save = view.findViewById(R.id.add_save_button);
         this.startCalendar = Calendar.getInstance();
         this.endCalendar = Calendar.getInstance();
+        this.progressDialog = new ProgressDialog(this.getContext());
+        this.progressDialog.setTitle("課題作成");
+        this.progressDialog.setMessage("作成中");
+        this.progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        this.progressDialog.setCanceledOnTouchOutside(false);
+
         this.model = new CreateFragmentModel(this);
         //予定表を読み込む
         try {
@@ -87,6 +95,8 @@ public class CreateEventFragment extends Fragment {
         this.start_time.setText(DayUtility.createTimeString(this.startCalendar));
         this.end_time.setText(DayUtility.createTimeString(this.endCalendar));
 
+        getActivity().setTitle(R.string.create_event);
+
     }
 
     private class onSaveButtonClick implements View.OnClickListener{
@@ -106,6 +116,8 @@ public class CreateEventFragment extends Fragment {
                     Toast.makeText(getContext(),"開始日時は終了日時よりも前の日時を入力してください",Toast.LENGTH_LONG).show();
                     return;
                 }
+                //課題を作成する
+                progressDialog.show();
                 scheduleSetter.createCalendarEvent(aSubject);
             }
             else{
@@ -171,40 +183,35 @@ public class CreateEventFragment extends Fragment {
      * イベントの作成に成功した時の処理
      */
     public void notifySuccessCreate(){
+        this.progressDialog.dismiss();
         try {
-            System.out.println(this.model.getJsonSchedule());
+
             FileUtility.writeFile("schedule.json", this.model.getJsonSchedule());
             Toast.makeText(this.getContext(), "作成しました。", Toast.LENGTH_SHORT).show();
+            if(getActivity()!=null) getActivity().getSupportFragmentManager().popBackStack();
         }catch (IOException anException){
             anException.printStackTrace();
             Toast.makeText(this.getContext(),"正しく書き込めませんでした",Toast.LENGTH_LONG).show();
             this.failedCalendarUpdate();
         }
-    }
-
-
-    /**
-     * シケジュールの更新が終了したことを通知
-     */
-    public void notifyFinCalendarUpdate() {
-        //スケジュールの内容を保存する
-        try {
-            FileUtility.writeFile("schedule.json", this.model.getJsonSchedule());
-            Toast.makeText(this.getContext(), "更新しました。", Toast.LENGTH_SHORT).show();
-        }catch (IOException anException){
-            anException.printStackTrace();
-            Toast.makeText(this.getContext(),"正しく書き込めませんでした",Toast.LENGTH_LONG).show();
-            this.failedCalendarUpdate();
-        }
-        return;
     }
 
     /**
      * スケジュールの更新に失敗した場合の処理
      */
     public void failedCalendarUpdate(){
+        this.progressDialog.dismiss();
         Toast.makeText(this.getContext(), "作成に失敗しました。", Toast.LENGTH_LONG).show();
         return;
+    }
+
+    /**
+     * 中断時の処理
+     */
+    @Override
+    public void onPause(){
+        super.onPause();
+        this.progressDialog.dismiss();
     }
 
 }

@@ -3,25 +3,25 @@ package com.example.scheduleapp;
 import android.os.Handler;
 import android.webkit.JavascriptInterface;
 
-public class CreateEventJsInterface {
-    private ScheduleSetter scheduleSetter;
+public class DeleteEventJsInterface {
+    private ScheduleDeleter scheduleDeleter;
     private volatile Integer errorCount = 0;
     private Handler handler;
 
     /**
      * このクラスのコンストラクタ
      * @param handler
-     * @param scheduleSetter
+     * @param scheduleDeleter
      */
-    public CreateEventJsInterface(Handler handler,ScheduleSetter scheduleSetter){
-        this.scheduleSetter = scheduleSetter;
+    public DeleteEventJsInterface(Handler handler,ScheduleDeleter scheduleDeleter){
+        this.scheduleDeleter = scheduleDeleter;
         this.handler = handler;
     }
 
     @JavascriptInterface
-    public void create(String jsonString){
-        System.out.println("登録完了");
-        this.scheduleSetter.successCreate(jsonString);
+    public void delete(){
+        System.out.println("削除完了");
+        this.scheduleDeleter.successDelete();
         this.errorCount = 0;
     }
 
@@ -43,11 +43,9 @@ public class CreateEventJsInterface {
             this.handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    scheduleSetter.failedToAccess();
+                    scheduleDeleter.failedToAccess();
                 }
             });
         }
     }
-
 }
-

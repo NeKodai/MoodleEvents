@@ -67,6 +67,12 @@ public class Subject extends Object implements Comparable<Subject>, Serializable
     public Integer getId(){ return this.id; }
 
     /**
+     * この課題のIDをセットする
+     * @param aInteger ID
+     */
+    public void setId(Integer aInteger){this.id = aInteger;}
+
+    /**
      * この課題のタイトルを返す
      * @return タイトルの文字列
      */

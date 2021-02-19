@@ -1,10 +1,13 @@
 <resources>
     <string name="app_name">Moodle Events</string>
     <string name="event_list">課題一覧</string>
+    <string name="create_event">課題追加</string>
     <string name="action_settings">設定</string>
-    <string name="action_reset">リセット</string>
+    <string name="about_app">このアプリケーションについて</string>
+    <string name="action_reset">データリセット</string>
     <string name="subject">課題</string>
     <string name="save">保存</string>
+    <string name="delete">削除</string>
     <string name="no_schedule_text">課題がありません\n下にスワイプして更新してください。</string>
     <string name="title_menu_view">課題名/コース名</string>
     <string name="startTime_menu_view">開始まで</string>
