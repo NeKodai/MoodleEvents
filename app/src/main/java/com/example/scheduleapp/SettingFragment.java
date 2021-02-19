@@ -1,5 +1,6 @@
 package com.example.scheduleapp;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
@@ -12,6 +13,7 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.textfield.TextInputEditText;
@@ -69,12 +71,12 @@ public class SettingFragment extends Fragment {
         this.after_spinner.setAdapter(afterAdapter);
         this.before_spinner.setSelection((beforeIndex==-1)? 0 : beforeIndex);
         this.after_spinner.setSelection((afterIndex==-1) ? 0:afterIndex);
-        this.before_spinner.setOnItemSelectedListener(new SettingFragment.periodSelectedListener(item->this.user.setBeforeSpinnerItem(item)));
-        this.after_spinner.setOnItemSelectedListener(new SettingFragment.periodSelectedListener(item->this.user.setAfterSpinnerItem(item)));
+
+        this.before_spinner.setOnItemSelectedListener(new SettingFragment.PeriodSelectedListener(item->this.user.setBeforeSpinnerItem(item)));
+        this.after_spinner.setOnItemSelectedListener(new SettingFragment.PeriodSelectedListener(item->this.user.setAfterSpinnerItem(item)));
 
         Button save = (Button)view.findViewById(R.id.save);
         save.setOnClickListener(v -> {this.saveClick();});
-
         getActivity().setTitle(R.string.action_settings);
 
         return;
@@ -83,7 +85,7 @@ public class SettingFragment extends Fragment {
     /**
      * 期間設定のスピナのリスナを定義するクラス
      */
-    private static class periodSelectedListener implements AdapterView.OnItemSelectedListener{
+    private static class PeriodSelectedListener implements AdapterView.OnItemSelectedListener{
 
         Consumer<SpinnerItem> process;
 
@@ -91,9 +93,10 @@ public class SettingFragment extends Fragment {
          * コンストラクタ
          * @param process 選択された時に行う処理
          */
-        public periodSelectedListener(Consumer<SpinnerItem> process){
+        public PeriodSelectedListener(Consumer<SpinnerItem> process){
             this.process = process;
         }
+        @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
             Spinner spinner = (Spinner)adapterView;

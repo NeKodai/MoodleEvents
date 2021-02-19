@@ -158,8 +158,14 @@ public class MainFragment extends Fragment {
      */
     public void notifyFinCalendarUpdate() {
         this.isUpdating = false;
-        ((MainActivity)getContext()).setDrawerLock(DrawerLayout.LOCK_MODE_UNLOCKED);
-        this.swipeRefreshLayout.setRefreshing(false);
+        this.handler.post(new Runnable() {
+            @Override
+            public void run() {
+                ((MainActivity)getContext()).setDrawerLock(DrawerLayout.LOCK_MODE_UNLOCKED);
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        });
+
         //スケジュールの内容を保存する
         try {
             FileUtility.writeFile("schedule.json", this.model.getJsonSchedule());
@@ -176,8 +182,14 @@ public class MainFragment extends Fragment {
      */
     public void failedCalendarUpdate(String message){
         this.isUpdating = false;
-        ((MainActivity)getContext()).setDrawerLock(DrawerLayout.LOCK_MODE_UNLOCKED);
-        this.swipeRefreshLayout.setRefreshing(false);
+
+        this.handler.post(new Runnable() {
+            @Override
+            public void run() {
+                ((MainActivity)getContext()).setDrawerLock(DrawerLayout.LOCK_MODE_UNLOCKED);
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        });
         Toast.makeText(this.getContext(), message, Toast.LENGTH_LONG).show();
         return;
     }
