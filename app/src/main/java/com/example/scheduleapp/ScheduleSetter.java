@@ -67,11 +67,12 @@ public class ScheduleSetter {
                 System.out.println("ログインエラー");
                 accessErrorCount = 0;
                 this.loginErrorCount = 0;
+                model.notifyFailedCalendarUpdate("ログインできませんでした");
                 return;
             }
             //Moodleなら
             if (url.matches("https://cclms.kyoto-su.ac.jp/")) {
-                System.out.println("get schedule");
+                System.out.println("set schedule");
                 executeCreateCEvent();
             }
             //ログインページなら
@@ -115,7 +116,7 @@ public class ScheduleSetter {
             System.out.println("アクセスエラー");
             accessErrorCount = 0;
             this.loginErrorCount = 0;
-            model.notifyFailedCalendarUpdate();
+            model.notifyFailedCalendarUpdate("Moodleに接続できませんでした");
         }
         else if(request.isForMainFrame()) {
             failedToAccess();

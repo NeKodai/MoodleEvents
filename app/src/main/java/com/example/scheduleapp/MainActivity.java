@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
     private WebView webView;
     private Menu menu;
+    private DrawerLayout drawer;
 
     /**
      * ビューの初期設定
@@ -45,10 +47,10 @@ public class MainActivity extends AppCompatActivity {
         this.webView = findViewById(R.id.webView1);
 
         //Drawerの設定
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        this.drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
-        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this,drawer,toolbar,R.string.drawer_open,R.string.drawer_close);
-        drawer.addDrawerListener(actionBarDrawerToggle);
+        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this,this.drawer,toolbar,R.string.drawer_open,R.string.drawer_close);
+        this.drawer.addDrawerListener(actionBarDrawerToggle);
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener()
         {
              @Override
@@ -56,18 +58,17 @@ public class MainActivity extends AppCompatActivity {
                  System.out.println(item);
                  drawer.closeDrawers();
                  FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                 getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                  switch(item.getItemId()){
                      case R.id.event_list_item:
                          if(!(getSupportFragmentManager().findFragmentById(R.id.container) instanceof MainFragment)){
-
+                             getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                              transaction.replace(R.id.container,new MainFragment());
                              transaction.commit();
                          }
                          break;
                      case R.id.add_event_item:
                          if(!(getSupportFragmentManager().findFragmentById(R.id.container) instanceof CreateEventFragment)) {
-
+                             getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                              transaction.replace(R.id.container, new CreateEventFragment());
                              transaction.addToBackStack(null);
                              transaction.commit();
@@ -75,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
                          break;
                      case R.id.setting_item:
                          if(!(getSupportFragmentManager().findFragmentById(R.id.container) instanceof SettingFragment)) {
-
+                             getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                              transaction.replace(R.id.container, new SettingFragment());
                              transaction.addToBackStack(null);
                              transaction.commit();
@@ -86,6 +87,14 @@ public class MainActivity extends AppCompatActivity {
              }
          });
         actionBarDrawerToggle.syncState();
+    }
+
+    /**
+     * ドロワーのロックを設定する
+     * @param lockMode  ロックモード
+     */
+    public void setDrawerLock(Integer lockMode){
+        this.drawer.setDrawerLockMode(lockMode);
     }
 
     /**
@@ -109,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         MenuItem item = menu.findItem(R.id.action_garbage);
+        item.getIcon().setTint(ContextCompat.getColor(this,R.color.garbageButton));
         item.setVisible(false);
         this.menu = menu;
         return true;
@@ -128,7 +138,10 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_about) {
-            return true;
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.container, new AboutAppFragment());
+            transaction.addToBackStack(null);
+            transaction.commit();
         }
         else if(id == R.id.action_garbage){
             if(getSupportFragmentManager().findFragmentById(R.id.container) instanceof SubjectFragment){

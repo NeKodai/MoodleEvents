@@ -67,7 +67,7 @@ public class ScheduleGetter extends Object{
                 System.out.println("ログインエラー");
                 accessErrorCount = 0;
                 this.loginErrorCount = 0;
-                model.notifyFailedCalendarUpdate();
+                model.notifyFailedCalendarUpdate("ログインできませんでした");
                 return;
             }
             //Moodleなら
@@ -116,7 +116,7 @@ public class ScheduleGetter extends Object{
                 System.out.println("アクセスエラー");
                 accessErrorCount = 0;
                 this.loginErrorCount = 0;
-                model.notifyFailedCalendarUpdate();
+                model.notifyFailedCalendarUpdate("Moodleにアクセスできませんでした");
             }
             else if(request.isForMainFrame()) {
                 failedToAccess();

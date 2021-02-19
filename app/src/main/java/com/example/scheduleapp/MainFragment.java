@@ -1,14 +1,21 @@
 package com.example.scheduleapp;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -26,13 +33,16 @@ public class MainFragment extends Fragment {
 
     private EventListAdapter rAdapter;
     private ScheduleGetter aScheduleGetter;
-    private Controller controller;
     private MainModel model;
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
     private TextView noScheduleText;
     private Timer timer;
     private Handler handler;
+    private LinearLayout upperMenu;
+    private AlertDialog sortDialog;
+    private UserStatus user;
+    private Boolean isUpdating = false;
 
     /**
      * Fragmentで表示するViewを作成するメソッド
@@ -56,16 +66,19 @@ public class MainFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         getActivity().setTitle(R.string.event_list);
         WebView aWebView = ((MainActivity)getContext()).getWebView();
+        FileUtility.initialize(getActivity().getApplicationContext());
         this.recyclerView = view.findViewById(R.id.recyclerView1);
         this.noScheduleText  =view.findViewById(R.id.no_schedule_text);
+        this.upperMenu = view.findViewById(R.id.event_list_upper);
         this.handler = new Handler();
-        FileUtility.initialize(getActivity().getApplicationContext());
+        this.user = new UserStatus();
+        this.user.readUserStatus();
+        this.selectEventSortDialog();
 
-        this.model = new MainModel(this);
+
+        this.model = new MainModel(this,this.user);
         this.aScheduleGetter = new ScheduleGetter(this.model,aWebView);
         aWebView.addJavascriptInterface(new MainJsInterface(this.handler,this.model,this.aScheduleGetter),"Android");
-        this.controller = new Controller();
-        this.controller.initialize(this,aScheduleGetter);
 
         //RecyclerViewの設定
         this.recyclerView.setHasFixedSize(true);
@@ -74,14 +87,19 @@ public class MainFragment extends Fragment {
         this.rAdapter = new EventListAdapter(this.model,this.getActivity()){
             @Override
             protected void onItemClick(View view, Integer position, Subject aSubject){
-                SubjectFragment subjectFragment = new SubjectFragment();
-                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                Bundle args = new Bundle();
-                args.putSerializable("subject",aSubject);
-                subjectFragment.setArguments(args);
-                transaction.replace(R.id.container,subjectFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
+                if(!isUpdating) {
+                    SubjectFragment subjectFragment = new SubjectFragment();
+                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                    Bundle args = new Bundle();
+                    args.putSerializable("subject", aSubject);
+                    subjectFragment.setArguments(args);
+                    transaction.replace(R.id.container, subjectFragment);
+                    transaction.addToBackStack(null);
+                    transaction.commit();
+                }
+                else{
+                    Toast.makeText(getContext(),"更新中です。しばらくお待ちください",Toast.LENGTH_SHORT).show();
+                }
             }
         };
         this.recyclerView.setAdapter(this.rAdapter);
@@ -93,7 +111,16 @@ public class MainFragment extends Fragment {
         this.swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                controller.updateSchedule();
+                isUpdating = true;
+                ((MainActivity)getContext()).setDrawerLock(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                aScheduleGetter.loadMoodle();
+            }
+        });
+
+        this.upperMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+               sortDialog.show();
             }
         });
 
@@ -102,7 +129,7 @@ public class MainFragment extends Fragment {
             this.model.readSchedule(FileUtility.readFile("schedule.json"));
             this.update();
         }catch (IOException anException){
-            Toast.makeText(getContext(),"正しく読み込めませんでした",Toast.LENGTH_LONG).show();
+            //Toast.makeText(getContext(),"正しく読み込めませんでした",Toast.LENGTH_LONG).show();
         }
         this.update();
         return;
@@ -131,6 +158,8 @@ public class MainFragment extends Fragment {
      * シケジュールの更新が終了したことを通知
      */
     public void notifyFinCalendarUpdate() {
+        isUpdating = false;
+        ((MainActivity)getContext()).setDrawerLock(DrawerLayout.LOCK_MODE_UNLOCKED);
         this.swipeRefreshLayout.setRefreshing(false);
         //スケジュールの内容を保存する
         try {
@@ -138,8 +167,7 @@ public class MainFragment extends Fragment {
             Toast.makeText(this.getContext(), "更新しました。", Toast.LENGTH_SHORT).show();
         }catch (IOException anException){
             anException.printStackTrace();
-            Toast.makeText(this.getContext(),"正しく書き込めませんでした",Toast.LENGTH_LONG).show();
-            this.failedCalendarUpdate();
+            this.failedCalendarUpdate("保存失敗しました");
         }
         return;
     }
@@ -147,10 +175,38 @@ public class MainFragment extends Fragment {
     /**
      * スケジュールの更新に失敗した場合の処理
      */
-    public void failedCalendarUpdate(){
+    public void failedCalendarUpdate(String message){
+        isUpdating = false;
+        ((MainActivity)getContext()).setDrawerLock(DrawerLayout.LOCK_MODE_UNLOCKED);
         this.swipeRefreshLayout.setRefreshing(false);
-        Toast.makeText(this.getContext(), "更新に失敗しました。", Toast.LENGTH_LONG).show();
+        Toast.makeText(this.getContext(), message, Toast.LENGTH_LONG).show();
         return;
+    }
+
+    /**
+     * ソート方法を決定するダイアログを表示
+     */
+    private void selectEventSortDialog(){
+        LayoutInflater layoutInflater = requireActivity().getLayoutInflater();
+        View view = layoutInflater.inflate(R.layout.sort_menu,null);
+        RadioGroup radioGroup =  view.findViewById(R.id.sort_radio_group);
+        CheckBox checkBox = view.findViewById(R.id.is_before_subject);
+        radioGroup.check((this.user.isAscendingOrder())? R.id.ascending:R.id.descending);
+        checkBox.setChecked(this.user.isBeforeSubjectVisible());
+        this.sortDialog = new AlertDialog.Builder(getContext())
+                .setTitle("ソート方法")
+                .setView(view)
+                .setPositiveButton("決定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Integer id = radioGroup.getCheckedRadioButtonId();
+                        user.setIsAscendingOrder(id.equals(R.id.ascending));
+                        user.setBeforeSubjectVisible(checkBox.isChecked());
+                        user.writeUserStatus();
+                        rAdapter.modelDataUpdate();
+                    }
+                })
+                .create();
     }
 
     /**
@@ -181,6 +237,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onPause(){
         this.timer.cancel();
+        this.swipeRefreshLayout.setRefreshing(false);
         super.onPause();
         System.out.println("中断しました");
         return;

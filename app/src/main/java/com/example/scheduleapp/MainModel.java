@@ -9,16 +9,21 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * 課題一覧のモデル
+ */
 public class MainModel extends Model{
 
     private MainFragment mainFragment;
+    private UserStatus user;
     /**
      * このクラスのコンストラクタ
      * @param aMainFragment ビュー
      */
-    public MainModel(MainFragment aMainFragment){
+    public MainModel(MainFragment aMainFragment,UserStatus user){
         super();
         this.mainFragment = aMainFragment;
+        this.user = user;
         return;
     }
 
@@ -31,12 +36,11 @@ public class MainModel extends Model{
             List<Subject> subjectList = SubjectUtility.jsonToSubjectList(jsonString);
             scheduleList.clear();
             this.addSchedule(subjectList);
-            this.sortScheduleByCalendar();
             this.mainFragment.notifyFinCalendarUpdate();
             this.notifyUpdate();
         }catch (Exception anException){
             anException.printStackTrace();
-            this.notifyFailedCalendarUpdate();
+            this.notifyFailedCalendarUpdate("正しく追加できませんでした");
         }
         return;
     }
@@ -59,17 +63,30 @@ public class MainModel extends Model{
     }
 
     /**
-     * 課題が現在よりも過去のものなら削除し、更新通知をする
+     * ユーザに指定された方法でソートされたイベントリストを返す
      */
-    public void scheduleUpdate(){
+    public List<Subject> getSortedScheduleList(){
         Iterator<Subject> anIterator = this.scheduleList.iterator();
-        while(anIterator.hasNext()){
-            Subject aSubject = anIterator.next();
-            if(aSubject.getRepresentativeTime()<System.currentTimeMillis()){
-                //anIterator.remove();
+        List<Subject> sortedList = new ArrayList<>();
+        //過去の課題を表示するかどうか
+        if(! this.user.isBeforeSubjectVisible()) {
+            while (anIterator.hasNext()) {
+                Subject aSubject = anIterator.next();
+                if (aSubject.getRepresentativeTime() >= System.currentTimeMillis()) {
+                    sortedList.add(aSubject);
+                }
             }
         }
-        this.notifyUpdate();
+        else{
+            sortedList = this.scheduleList;
+        }
+        //降順か昇順か
+        if(this.user.isAscendingOrder()) {
+            Collections.sort(sortedList);
+        }else{
+            Collections.sort(sortedList,Collections.reverseOrder());
+        }
+        return sortedList;
     }
 
     /**
@@ -83,8 +100,8 @@ public class MainModel extends Model{
     /**
      * カレンダーの更新が失敗したことを通知
      */
-    public void notifyFailedCalendarUpdate(){
-        this.mainFragment.failedCalendarUpdate();
+    public void notifyFailedCalendarUpdate(String message){
+        this.mainFragment.failedCalendarUpdate(message);
         return;
     }
 
