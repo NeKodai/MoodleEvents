@@ -1,5 +1,5 @@
 # MoodleEvents
-Android用Moodle課題管理ソフトウェア
+Android OS用Moodle課題一覧ソフトウェア
 
 ## 対応バージョン
 Android7.0(APIレベル24)以上
@@ -14,3 +14,5 @@ Android7.0(APIレベル24)以上
 ## ダウンロード方法
 下記のURLからAPKをダウンロードできます<br>
 https://drive.google.com/file/d/1fKE2KJFFRPB0yOS9GwrDNYWdoaX-6nMM/view?usp=sharing
+
+※アプリの使用は自己責任でお願いします。
